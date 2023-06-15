@@ -1,6 +1,8 @@
 import re
 import json
 from module import WILLHANDLE
+from module import user_handeling as user
+import os
 
 
 def regexCreator(searchedWords):
@@ -32,12 +34,61 @@ def findAllMatchingQuestion(r:str, jdata: dict) -> list[[str,int]]:
     return questionList
 
 
-def addQuestionToDictionary():
+def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFilePath: str)   :
+    """
+    Update the Question list for you with a simple link
+    :return: None
+    """
+    driv.open_specific_url(urlOfQuiz)  # go to the open quiz page
+    # add the data to the file
+
+    with open(QAFilePath, 'r') as QAData:
+        existingdata = json.load(QAData)
+        newData = driv.get_question_dict()
+        fulldata = existingdata.append(newData)
+    with open(QAFilePath, 'w') as QAData:
+        json.dump(fulldata, QAData, indent=4)
+
+
+
+
+
+
+
+
+def needAccessToWebsite():
+    """
+    Open the willis website and connect
+    :return: a driver at the connection page of willis
+    """
     d = WILLHANDLE.WILLHANDLE()
-    d.
+    with open('profile.json', 'r') as profiler:
+        profiler = profiler.read()
+        with open('decryption.txt', 'r') as decryption:
+            password = input('Enter the password for the file')
+            key, salt = user.load_key_and_salt_from_file('decryption.txt')
+            profiler = user.decrypt_data(profiler, password, key, salt)
+        d.willis_moodle_connection(profiler['Willis']['username'], profiler['Willis']['password'])
+    return d
+
+
+
+
 
 
 def main():
+    if not os.path.isfile('willisAnswer.json'):
+        pass  # When we do not have the file of answer
+    if not os.path.isfile('profile.json'):
+        path_to_data = 'username.json'
+        willis_username = input("Enter your Willis email (e.g., 'bob.ross@students.williscollege.com'): ")
+        willis_password = input("Enter your Willis email password: ")
+        fpassword = input("File password")
+        user.create_data_file(path_to_data, willis_username, willis_password, fpassword)
+        base_key, base_salt = user.generate_base_key_and_salt()
+        user.save_key_and_salt_to_file(base_key, base_salt, 'decryption.txt')
+        user.encrypt_file(path_to_data, fpassword, base_key, base_salt)
+
     r = regexCreator(userInput('word search: '))
     jdata = openJsonData('.\\data.json')
     questionList: list[[str,int]] = findAllMatchingQuestion(r, jdata)

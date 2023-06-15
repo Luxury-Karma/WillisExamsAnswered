@@ -14,39 +14,39 @@ class WILLHANDLE:
     def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None):
         self.QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
         self.WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
-        self.driv = webdriver.Chrome()
+        self._driv = webdriver.Chrome()
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
         try:
-            WebDriverWait(self.driv, 10).until(EC.presence_of_element_located((By.NAME, 'loginfmt')))
-            input_field = self.driv.find_element(By.NAME, 'loginfmt')
+            WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.NAME, 'loginfmt')))
+            input_field = self._driv.find_element(By.NAME, 'loginfmt')
             input_field.send_keys(username)
             input_field.send_keys(Keys.ENTER)
 
-            WebDriverWait(self.driv, 15).until(EC.visibility_of_element_located((By.NAME, 'passwd')))
-            input_field = self.driv.find_element(By.NAME, 'passwd')
+            WebDriverWait(self._driv, 15).until(EC.visibility_of_element_located((By.NAME, 'passwd')))
+            input_field = self._driv.find_element(By.NAME, 'passwd')
             input_field.send_keys(password)
 
-            click_specific_btn(self.driv, 'id="idSIButton9"', 'input')
+            click_specific_btn(self._driv, 'id="idSIButton9"', 'input')
 
-            WebDriverWait(self.driv, 15).until(EC.element_to_be_clickable((By.ID, 'idBtn_Back')))
-            self.driv.find_element(By.ID, 'idBtn_Back').click()
+            WebDriverWait(self._driv, 15).until(EC.element_to_be_clickable((By.ID, 'idBtn_Back')))
+            self._driv.find_element(By.ID, 'idBtn_Back').click()
 
         except Exception as e:
             print("An error occurred: ", e)
 
     def __willis_college_connection(self, willis_username: str, willis_password: str) -> None:
-        self.driv.get(self.WILLIS_WEB_SITE)
+        self._driv.get(self.WILLIS_WEB_SITE)
 
         try:
-            WebDriverWait(self.driv, 10).until(
+            WebDriverWait(self._driv, 10).until(
                 EC.presence_of_element_located((By.CSS_SELECTOR, 'img[alt="Sign in with Microsoft"]'))
             )
         except Exception as e:
             print("An error occurred: ", e)
         else:
-            link = WebDriverWait(self.driv, 10).until(
+            link = WebDriverWait(self._driv, 10).until(
                 EC.presence_of_element_located((By.XPATH, '//img[@alt="Sign in with Microsoft"]/..'))
             )
             link.click()
@@ -54,18 +54,18 @@ class WILLHANDLE:
 
     def __willis_to_moodle(self) -> str:
         try:
-            WebDriverWait(self.driv, 20).until(EC.element_to_be_clickable((By.LINK_TEXT, 'Moodle')))
-            self.driv.find_element(By.LINK_TEXT, 'Moodle').click()
+            WebDriverWait(self._driv, 20).until(EC.element_to_be_clickable((By.LINK_TEXT, 'Moodle')))
+            self._driv.find_element(By.LINK_TEXT, 'Moodle').click()
 
-            self.driv.switch_to.window(self.driv.window_handles[-1])
+            self._driv.switch_to.window(self._driv.window_handles[-1])
 
-            return self.driv.current_url
+            return self._driv.current_url
         except Exception as e:
             print("An error occurred: ", e)
 
     def __get_timeline_urls(self) -> list[str]:
         try:
-            divs = self.driv.find_elements(By.XPATH, '//div[@class="list-group-item timeline-event-list-item flex-column pt-2 pb-0 border-0 px-2" and @data-region="event-list-item"]')
+            divs = self._driv.find_elements(By.XPATH, '//div[@class="list-group-item timeline-event-list-item flex-column pt-2 pb-0 border-0 px-2" and @data-region="event-list-item"]')
             return [div.find_element(By.TAG_NAME, 'a').get_attribute('href') for div in divs]
         except:
             return None
@@ -74,7 +74,7 @@ class WILLHANDLE:
     # region get quiz data
     @overload
     def get_question_dict(self) -> dict:
-        soup = BeautifulSoup(self.driv.page_source, 'html.parser')
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
         for question_div in question_divs:
@@ -93,7 +93,7 @@ class WILLHANDLE:
         return questions_dict
 
     def get_question_dict(self, courseType=None) -> dict:
-        soup = BeautifulSoup(self.driv.page_source, 'html.parser')
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
         for question_div in question_divs:
@@ -116,20 +116,29 @@ class WILLHANDLE:
         urls = self.__get_timeline_urls()
         for url in urls:
             if re.fullmatch(self.QUIZ_DETECTION_REGEX, url):
-                self.driv.get(url)
+                self._driv.get(url)
                 break
 
-        click_specific_btn(self.driv, 'class="btn btn-primary"', 'button')
+        click_specific_btn(self._driv, 'class="btn btn-primary"', 'button')
 
-        self.driv.switch_to.window(self.driv.window_handles[-1])
+        self._driv.switch_to.window(self._driv.window_handles[-1])
 
-        WebDriverWait(self.driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'que')))
+        WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'que')))
 
         return self.get_question_dict()
 
 
-    def willis_moodle_connection(self):
-        pass
+    def willis_moodle_connection(self, username: str, password: str):
+        self.__willis_college_connection(username, password)
+
+    def open_specific_url(self, url: str):
+        """
+        Open a specific URL from the same driver
+        :param url: The path to open
+        :return: None
+        """
+        self._driv.get(url)
+
     # endregion
 
     # region apply webpage data
@@ -143,7 +152,7 @@ class WILLHANDLE:
         qa_pairs = re.findall(r"(?ms)(Question:.*?(?:Answer:|Answers:).*?)(?=Question:|$)", qa_text)
 
         # Find all 'qtext' divs on the page
-        qtext_divs = self.driv.find_elements(By.CLASS_NAME, 'qtext')
+        qtext_divs = self._driv.find_elements(By.CLASS_NAME, 'qtext')
 
         # For each 'qtext' div
         for i, qtext_div in enumerate(qtext_divs):
@@ -170,8 +179,9 @@ class WILLHANDLE:
                     p.style.color = 'green';
                     arguments[1].parentNode.insertBefore(p, arguments[1].nextSibling);
                 """
-                self.driv.execute_script(script, answer_with_link, qtext_div)
+                self._driv.execute_script(script, answer_with_link, qtext_div)
     # endregion
+
 
 def display(questions_dict):
     for question_id, question_data in questions_dict.items():
