@@ -10,11 +10,10 @@ def regexCreator(searchedWords):
     return f'(?:{regStr})'
 
 
-def openJsonData(pathToData: str) -> dict:
+def openJsonData(pathToData: open) -> dict:
     jsonDic ={}
     try :
-        with open(pathToData, 'r') as data:
-            jsonDic = json.load(data)
+        jsonDic = json.load(pathToData)
     except Exception as e:
         print(f'{e} error in file')
     return jsonDic
@@ -50,47 +49,55 @@ def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFileP
         json.dump(fulldata, QAData, indent=4)
 
 
-
-
-
-
-
-
-def needAccessToWebsite():
+def needAccessToWebsite(user_profile_path: str, keys_path: str) -> WILLHANDLE.WILLHANDLE:
     """
     Open the willis website and connect
     :return: a driver at the connection page of willis
     """
     d = WILLHANDLE.WILLHANDLE()
-    with open('profile.json', 'r') as profiler:
+    with open(user_profile_path, 'r') as profiler:
         profiler = profiler.read()
-        with open('decryption.txt', 'r') as decryption:
-            password = input('Enter the password for the file')
-            key, salt = user.load_key_and_salt_from_file('decryption.txt')
-            profiler = user.decrypt_data(profiler, password, key, salt)
+        password = input('Enter the password for the file')
+        key, salt = user.load_key_and_salt_from_file(keys_path)
+        profiler = user.decrypt_data(profiler, password, key, salt)
         d.willis_moodle_connection(profiler['Willis']['username'], profiler['Willis']['password'])
     return d
 
 
-
-
+def createAllNeededUsers(path_to_data: str, encryption_file: str):
+    willis_username = input("Enter your Willis email (e.g., 'bob.ross@students.williscollege.com'): ")
+    willis_password = input("Enter your Willis email password: ")
+    fpassword = input("File password")
+    user.create_data_file(path_to_data, willis_username, willis_password, fpassword)
+    base_key, base_salt = user.generate_base_key_and_salt()
+    user.save_key_and_salt_to_file(base_key, base_salt, encryption_file)
+    user.encrypt_file(path_to_data, fpassword, base_key, base_salt)
 
 
 def main():
-    if not os.path.isfile('willisAnswer.json'):
-        pass  # When we do not have the file of answer
+    path_to_user_data: str = 'profile.json'
+    path_key: str = 'decryption.txt'
+    course_Section_url: str = 'https://students.willisonline.ca/my/courses.php'
     if not os.path.isfile('profile.json'):
-        path_to_data = 'username.json'
-        willis_username = input("Enter your Willis email (e.g., 'bob.ross@students.williscollege.com'): ")
-        willis_password = input("Enter your Willis email password: ")
-        fpassword = input("File password")
-        user.create_data_file(path_to_data, willis_username, willis_password, fpassword)
-        base_key, base_salt = user.generate_base_key_and_salt()
-        user.save_key_and_salt_to_file(base_key, base_salt, 'decryption.txt')
-        user.encrypt_file(path_to_data, fpassword, base_key, base_salt)
+        createAllNeededUsers(path_to_user_data, path_key)
+    if not os.path.isfile('willisAnswer.json'):  # When we do not have the file of answer
+        driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key)
+        driver.open_specific_url(course_Section_url)
+
+
+
+
 
     r = regexCreator(userInput('word search: '))
-    jdata = openJsonData('.\\data.json')
+    jdata = {}  # initialisation
+    try:
+        with open(path_to_user_data,'r') as data:
+            uspassword = input('enter the password for the user file')
+            ukey, usalt = user.load_key_and_salt_from_file(path_key)
+            user.decrypt_data(path_to_user_data, uspassword, ukey, usalt)
+            jdata = openJsonData('.\\data.json')
+    except Exception as e:
+        print(f'There was an error with the file error : {e}')
     questionList: list[[str,int]] = findAllMatchingQuestion(r, jdata)
     for question in questionList:
         print(f'{question[0]} the answer is : {jdata[question[0]]["answer"]}, from the course : {jdata[question[0]]["cours"]}')

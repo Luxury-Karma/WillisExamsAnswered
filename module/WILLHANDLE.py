@@ -127,6 +127,32 @@ class WILLHANDLE:
 
         return self.get_question_dict()
 
+    def get_all_course(self) -> list[str]:
+        """
+        Get all the course from the correct URL
+        :return: a list of the course links
+        """
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+        course_div = soup.find_all('div', class_='card dashboard-card')
+        allurl: list[str] = []
+        for div in course_div:
+            anchor = div.find('a')
+            if anchor:
+                allurl.append(anchor['href'])
+        return allurl
+
+    def get_all_quiz_url_in_webpage(self):
+        """
+        find all the URL inside the webpage that have the word quiz
+        :return: all the quiz URL from this web
+        """
+        soup = BeautifulSoup(self._driv.page_source,'html.parser')
+        course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
+        for div in course_data:
+
+        pass
+
+
 
     def willis_moodle_connection(self, username: str, password: str):
         self.__willis_college_connection(username, password)
