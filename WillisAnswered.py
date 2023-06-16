@@ -43,7 +43,7 @@ def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFileP
 
     with open(QAFilePath, 'r') as QAData:
         existingdata = json.load(QAData)
-        newData = driv.get_question_dict()
+        newData = driv.get_question_answer_dict()
         fulldata = existingdata.append(newData)
     with open(QAFilePath, 'w') as QAData:
         json.dump(fulldata, QAData, indent=4)
@@ -64,28 +64,34 @@ def needAccessToWebsite(user_profile_path: str, keys_path: str) -> WILLHANDLE.WI
     return d
 
 
-def createAllNeededUsers(path_to_data: str, encryption_file: str):
-    willis_username = input("Enter your Willis email (e.g., 'bob.ross@students.williscollege.com'): ")
-    willis_password = input("Enter your Willis email password: ")
-    fpassword = input("File password")
-    user.create_data_file(path_to_data, willis_username, willis_password, fpassword)
-    base_key, base_salt = user.generate_base_key_and_salt()
-    user.save_key_and_salt_to_file(base_key, base_salt, encryption_file)
-    user.encrypt_file(path_to_data, fpassword, base_key, base_salt)
+def willis_user_creation(path_to_data, path_to_key: str):
+    if not user.data_detection(path_to_data):
+        username: str = input('Enter the willis email exemple : \'bob.ross@students.williscollege.com\': ')
+        password: str = input('Enter you\'re willis email password: ')
+        fPassword: str = input('Enter the file password')
+        user.create_data_file(path_to_data, username, password, fPassword, path_to_key)
+
 
 
 def main():
-    path_to_user_data: str = 'profile.json'
-    path_key: str = 'decryption.txt'
+    path_to_user_data: str = '.\\userFile\\profile.json'
+    path_key: str = '.\\userFile\\decryption.txt'
+    willisAnswerFile = '.\\userFile\\willisAnswer.json'
     course_Section_url: str = 'https://students.willisonline.ca/my/courses.php'
     if not os.path.isfile('profile.json'):
-        createAllNeededUsers(path_to_user_data, path_key)
-    if not os.path.isfile('willisAnswer.json'):  # When we do not have the file of answer
+        willis_user_creation(path_to_user_data, path_key)
+    if not os.path.isfile(willisAnswerFile):  # When we do not have the file of answer
+        with open(willisAnswerFile, 'w') as f:
+            print('file created')
         driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key)
         driver.open_specific_url(course_Section_url)
-
-
-
+        course_url = driver.get_all_quiz_url_in_webpage()
+        for course in course_url:
+            driver.open_specific_url(course)  # should put on the URL of the website
+            quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
+            for quiz in quizs_url:
+                driver.open_specific_url(quiz)
+                addQuestionToDictionary(driver.get_quiz_review(), driver, willisAnswerFile)
 
 
     r = regexCreator(userInput('word search: '))

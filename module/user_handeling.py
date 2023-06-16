@@ -26,14 +26,14 @@ def willis_account_creation(username: str, password: str):
     return {'Willis_College_user': {'username': username, 'password': password}}
 
 
-def create_data_file(path_to_data, username: str, password: str, filePassword: str) :
+def create_data_file(path_to_data, username: str, password: str, filePassword: str,keyPath) :
     data = willis_account_creation(username, password)
     # Create the file initially
     with open(path_to_data, 'w') as f:
         json.dump(data, f)
         f.flush()
     base_key, base_salt = generate_base_key_and_salt()
-    save_key_and_salt_to_file(base_key, base_salt, '../../decryption.txt')
+    save_key_and_salt_to_file(base_key, base_salt, keyPath)
     encrypt_file(path_to_data, filePassword, base_key, base_salt)
 
 
@@ -56,9 +56,6 @@ def derive_key(base_key, base_salt, password, iterations=100000):
     derived_key = kdf.derive(b''.join([base_key, bytes(password.encode('UTF-8'))]))
     derived_key_base64 = base64.urlsafe_b64encode(derived_key)
     return derived_key_base64
-
-
-
 
 
 def save_key_and_salt_to_file(key, salt, filename):

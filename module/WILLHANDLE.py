@@ -72,7 +72,7 @@ class WILLHANDLE:
     # endregion
 
     # region get quiz data
-    @overload
+
     def get_question_dict(self) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
@@ -92,7 +92,8 @@ class WILLHANDLE:
             }
         return questions_dict
 
-    def get_question_dict(self, courseType=None) -> dict:
+
+    def get_question_answer_dict(self, courseType: str = None) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
@@ -125,7 +126,19 @@ class WILLHANDLE:
 
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'que')))
 
-        return self.get_question_dict()
+        return self.get_question_answer_dict()
+
+
+    def get_quiz_review(self) -> str:
+        """
+        When you are in a quiz URL find the button for the review and send the URL of the quiz
+        :return: url
+        """
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+        link = soup.find('class', class_='table-responsive').find('a').get('href')  # Should give the link to the review
+        return link
+
+
 
     def get_all_course(self) -> list[str]:
         """
@@ -138,19 +151,23 @@ class WILLHANDLE:
         for div in course_div:
             anchor = div.find('a')
             if anchor:
-                allurl.append(anchor['href'])
+                allurl.append(anchor.get('href'))
         return allurl
 
-    def get_all_quiz_url_in_webpage(self):
+    def get_all_quiz_url_in_webpage(self) -> list[str]:
         """
         find all the URL inside the webpage that have the word quiz
         :return: all the quiz URL from this web
         """
-        soup = BeautifulSoup(self._driv.page_source,'html.parser')
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
+        quizURL = []
         for div in course_data:
+            href = div.get('href')
+            if re.fullmatch(self.QUIZ_DETECTION_REGEX,href):
+                quizURL.append(href)
 
-        pass
+        return quizURL
 
 
 
@@ -164,6 +181,7 @@ class WILLHANDLE:
         :return: None
         """
         self._driv.get(url)
+        WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
     # endregion
 
