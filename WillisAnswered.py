@@ -1,5 +1,7 @@
 import re
 import json
+import time
+
 from module import WILLHANDLE
 from module import user_handeling as user
 import os
@@ -49,18 +51,22 @@ def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFileP
         json.dump(fulldata, QAData, indent=4)
 
 
-def needAccessToWebsite(user_profile_path: str, keys_path: str) -> WILLHANDLE.WILLHANDLE:
+def needAccessToWebsite(user_profile_path: str, keys_path: str, userSection : str) -> WILLHANDLE.WILLHANDLE:
     """
     Open the willis website and connect
     :return: a driver at the connection page of willis
     """
     d = WILLHANDLE.WILLHANDLE()
+    time.sleep(3)
     with open(user_profile_path, 'r') as profiler:
+
         profiler = profiler.read()
         password = input('Enter the password for the file')
         key, salt = user.load_key_and_salt_from_file(keys_path)
         profiler = user.decrypt_data(profiler, password, key, salt)
-        d.willis_moodle_connection(profiler['Willis']['username'], profiler['Willis']['password'])
+        profiler = json.loads(profiler)
+        d.willis_moodle_connection(profiler[userSection]['username'], profiler[userSection]['password'])
+
     return d
 
 
@@ -83,9 +89,11 @@ def main():
     if not os.path.isfile(willisAnswerFile):  # When we do not have the file of answer
         with open(willisAnswerFile, 'w') as f:
             print('file created')
-        driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key)
+        driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
         driver.open_specific_url(course_Section_url)
-        course_url = driver.get_all_quiz_url_in_webpage()
+        course_url = driver.get_all_course()
+
+        # TODO: NEED UPDATE TO GET CORRECTLY THE GET URL QUIZS
         for course in course_url:
             driver.open_specific_url(course)  # should put on the URL of the website
             quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL

@@ -154,6 +154,8 @@ class WILLHANDLE:
                 allurl.append(anchor.get('href'))
         return allurl
 
+
+# TODO: There is a problem. I have not yet enter a course and I am trying to get the quiz
     def get_all_quiz_url_in_webpage(self) -> list[str]:
         """
         find all the URL inside the webpage that have the word quiz
@@ -164,7 +166,8 @@ class WILLHANDLE:
         quizURL = []
         for div in course_data:
             href = div.get('href')
-            if re.fullmatch(self.QUIZ_DETECTION_REGEX,href):
+
+            if href and re.fullmatch(self.QUIZ_DETECTION_REGEX,href):  # ERROR BITES HERE
                 quizURL.append(href)
 
         return quizURL
@@ -173,6 +176,7 @@ class WILLHANDLE:
 
     def willis_moodle_connection(self, username: str, password: str):
         self.__willis_college_connection(username, password)
+        self.__willis_to_moodle()
 
     def open_specific_url(self, url: str):
         """
