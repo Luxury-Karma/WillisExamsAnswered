@@ -93,7 +93,7 @@ def main():
     driver.open_specific_url(course_Section_url)
     course_url = driver.get_all_course()
 
-    # TODO: NEED UPDATE TO GET CORRECTLY THE GET URL QUIZS
+
     for course in course_url:
         driver.open_specific_url(course)  # should put on the URL of the website
         quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL

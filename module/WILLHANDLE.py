@@ -173,7 +173,8 @@ class WILLHANDLE:
         """
 
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
-        self.ensure_index_is_open()
+        self.ensure_index_is_open()  # Ensure the index of the course is open
+        # TODO: NEED TO UPDATE THE CRAPE OUT OF THIS. I need it to correctly get the index. Go in it get every link and compare it to the REGEX to see if the link would work
         course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
 
         quizURL = []
@@ -185,7 +186,7 @@ class WILLHANDLE:
                 if re.fullmatch(self.QUIZ_DETECTION_REGEX, href):  # ERROR BITES HERE
                     quizURL.append(href)
 
-        return quizURL
+        return quizURL  # All the links for that webpage of quizs
 
 
 
