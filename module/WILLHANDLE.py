@@ -155,20 +155,24 @@ class WILLHANDLE:
         return allurl
 
 
-# TODO: There is a problem. I have not yet enter a course and I am trying to get the quiz
+# TODO: I think that as long as that the side bar have not been open it is not loaded. I need to force open it to find it.
     def get_all_quiz_url_in_webpage(self) -> list[str]:
         """
         find all the URL inside the webpage that have the word quiz
         :return: all the quiz URL from this web
         """
+
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
+
         quizURL = []
         for div in course_data:
-            href = div.get('href')
 
-            if href and re.fullmatch(self.QUIZ_DETECTION_REGEX,href):  # ERROR BITES HERE
-                quizURL.append(href)
+            anchor = div.find('a')
+            if anchor:
+                href = anchor.get('href')
+                if re.fullmatch(self.QUIZ_DETECTION_REGEX, href):  # ERROR BITES HERE
+                    quizURL.append(href)
 
         return quizURL
 
