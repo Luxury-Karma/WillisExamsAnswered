@@ -154,8 +154,18 @@ class WILLHANDLE:
                 allurl.append(anchor.get('href'))
         return allurl
 
+    def ensure_index_is_open(self):
+        WebDriverWait(self._driv, 10).until(EC.presence_of_element_located(
+            (By.CLASS_NAME, 'sr-only')))
 
-# TODO: I think that as long as that the side bar have not been open it is not loaded. I need to force open it to find it.
+        button = self._driv.find_element(By.CSS_SELECTOR, '.drawer-toggler.drawer-left-toggle.open-nav.d-print-none')
+
+
+        if 'open' in button.get_attribute('class'):
+            button.click()
+        else:
+            pass
+
     def get_all_quiz_url_in_webpage(self) -> list[str]:
         """
         find all the URL inside the webpage that have the word quiz
@@ -163,6 +173,7 @@ class WILLHANDLE:
         """
 
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+        self.ensure_index_is_open()
         course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
 
         quizURL = []

@@ -153,3 +153,4 @@ cython_debug/
 data.json
 userFile/profile.json
 userFile/willisAnswer.json
+userFile/decryption.txt

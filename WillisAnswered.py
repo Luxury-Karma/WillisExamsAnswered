@@ -89,17 +89,20 @@ def main():
     if not os.path.isfile(willisAnswerFile):  # When we do not have the file of answer
         with open(willisAnswerFile, 'w') as f:
             print('file created')
-        driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
-        driver.open_specific_url(course_Section_url)
-        course_url = driver.get_all_course()
+    driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
+    driver.open_specific_url(course_Section_url)
+    course_url = driver.get_all_course()
 
-        # TODO: NEED UPDATE TO GET CORRECTLY THE GET URL QUIZS
-        for course in course_url:
-            driver.open_specific_url(course)  # should put on the URL of the website
-            quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
-            for quiz in quizs_url:
-                driver.open_specific_url(quiz)
-                addQuestionToDictionary(driver.get_quiz_review(), driver, willisAnswerFile)
+    # TODO: NEED UPDATE TO GET CORRECTLY THE GET URL QUIZS
+    for course in course_url:
+        driver.open_specific_url(course)  # should put on the URL of the website
+        quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
+        for quiz in quizs_url:
+            driver.open_specific_url(quiz)
+            addQuestionToDictionary(driver.get_quiz_review(), driver, willisAnswerFile)
+
+
+
 
 
     r = regexCreator(userInput('word search: '))
