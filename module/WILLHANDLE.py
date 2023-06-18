@@ -1,4 +1,5 @@
 import re
+import time
 import urllib
 from typing import overload
 from urllib.parse import urlparse
@@ -98,17 +99,20 @@ class WILLHANDLE:
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
         for question_div in question_divs:
-            question_text = question_div.find('div', class_='qtext').text.strip()
+            try:
+                question_text = question_div.find('div', class_='qtext').text.strip()
 
-            answer_divs = question_div.find_all('div', class_='rightanswer')
-            answer_text = []
-            for answer_div in answer_divs:
-                answer_text.append(answer_div.get_text())
+                answer_divs = question_div.find_all('div', class_='rightanswer')
+                answer_text = []
+                for answer_div in answer_divs:
+                    answer_text.append(answer_div.get_text())
 
-            questions_dict[question_text] = {
-                'cours': courseType,
-                'answer': answer_text if answer_text else None
-            }
+                questions_dict[question_text] = {
+                    'cours': courseType,
+                    'answer': answer_text if answer_text else None
+                }
+            except Exception as e:
+                print(f'Error {e}')
         return questions_dict
 
     def get_quiz(self, username, password) -> dict:
@@ -134,8 +138,13 @@ class WILLHANDLE:
         When you are in a quiz URL find the button for the review and send the URL of the quiz
         :return: url
         """
-        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
-        link = soup.find('class', class_='table-responsive').find('a').get('href')  # Should give the link to the review
+        link = ''
+        try:
+            WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'table-responsive')))
+            soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+            link = soup.find('div', class_='table-responsive').find('a').get('href')  # Should give the link to the review
+        except Exception as e:
+            print(f'Can\'t find a link exception : {e}')
         return link
 
 
@@ -145,6 +154,7 @@ class WILLHANDLE:
         Get all the course from the correct URL
         :return: a list of the course links
         """
+        WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR,'#page-container-1 > div > div')))
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         course_div = soup.find_all('div', class_='card dashboard-card')
         allurl: list[str] = []
@@ -154,6 +164,9 @@ class WILLHANDLE:
                 allurl.append(anchor.get('href'))
         return allurl
 
+
+
+    # TODO: Fix the fact that if it is allready open on the moodle page it break. Probably solve with a try except
     def ensure_index_is_open(self):
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located(
             (By.CLASS_NAME, 'sr-only')))
@@ -162,7 +175,15 @@ class WILLHANDLE:
 
 
         if 'open' in button.get_attribute('class'):
-            button.click()
+            try:
+                button.click()
+            except Exception as e:
+                print(f'page allready open {e}')
+                button_element = self._driv.find_element(By.CSS_SELECTOR,
+                                                         '#theme_boost-drawers-courseindex > div.drawerheader > button')
+                button_element.click()
+                time.sleep(1)
+                button.click()
         else:
             pass
 
@@ -171,19 +192,20 @@ class WILLHANDLE:
         find all the URL inside the webpage that have the word quiz
         :return: all the quiz URL from this web
         """
-
-        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         self.ensure_index_is_open()  # Ensure the index of the course is open
+        WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.ID, 'theme_boost-drawers-courseindex')))  # Should ensure that the index is open
+        soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         # TODO: NEED TO UPDATE THE CRAPE OUT OF THIS. I need it to correctly get the index. Go in it get every link and compare it to the REGEX to see if the link would work
-        course_data = soup.find_all('div', class_='drawercontent drag-container')  # find the section with all the homework
+        course_data = soup.find_all('div', class_='drawer drawer-left d-print-none show')  # find the section with all the homework
 
         quizURL = []
         for div in course_data:
 
-            anchor = div.find('a')
-            if anchor:
-                href = anchor.get('href')
-                if re.fullmatch(self.QUIZ_DETECTION_REGEX, href):  # ERROR BITES HERE
+            divisions = div.find_all('a', class_='courseindex-link text-truncate')
+            for d in divisions:
+                print(d)
+                href = d.get('href')
+                if re.match(self.QUIZ_DETECTION_REGEX,href):
                     quizURL.append(href)
 
         return quizURL  # All the links for that webpage of quizs

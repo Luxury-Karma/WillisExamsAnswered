@@ -34,7 +34,7 @@ def findAllMatchingQuestion(r:str, jdata: dict) -> list[[str,int]]:
     questionList.sort(key=lambda x: x[1], reverse=True)  # sort from the highest match amount
     return questionList
 
-
+# TODO: ensureit get correctly the data
 def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFilePath: str)   :
     """
     Update the Question list for you with a simple link
@@ -46,9 +46,13 @@ def addQuestionToDictionary(urlOfQuiz: str, driv: WILLHANDLE.WILLHANDLE, QAFileP
     with open(QAFilePath, 'r') as QAData:
         existingdata = json.load(QAData)
         newData = driv.get_question_answer_dict()
-        fulldata = existingdata.append(newData)
-    with open(QAFilePath, 'w') as QAData:
-        json.dump(fulldata, QAData, indent=4)
+        try:
+            existingdata.update(newData)
+        except Exception as e:
+            print(f'The dictionary was empty {e}')
+
+    with open(QAFilePath, 'w') as NewQAData:
+        json.dump(existingdata, NewQAData, indent=4)
 
 
 def needAccessToWebsite(user_profile_path: str, keys_path: str, userSection : str) -> WILLHANDLE.WILLHANDLE:
@@ -88,6 +92,7 @@ def main():
         willis_user_creation(path_to_user_data, path_key)
     if not os.path.isfile(willisAnswerFile):  # When we do not have the file of answer
         with open(willisAnswerFile, 'w') as f:
+            json.dump({}, f, indent=4)
             print('file created')
     driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
     driver.open_specific_url(course_Section_url)
@@ -99,7 +104,11 @@ def main():
         quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
         for quiz in quizs_url:
             driver.open_specific_url(quiz)
-            addQuestionToDictionary(driver.get_quiz_review(), driver, willisAnswerFile)
+            quiz_link = driver.get_quiz_review()
+            if quiz_link != '':
+                addQuestionToDictionary(quiz_link, driver, willisAnswerFile)
+            else:
+                print('There is no link for the review')
 
 
 
