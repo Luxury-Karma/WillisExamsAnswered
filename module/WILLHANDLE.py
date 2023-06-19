@@ -12,11 +12,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class WILLHANDLE:
-    def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None):
+    def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None, driv: webdriver = None):
         self.QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
         self.WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
-        self._driv = webdriver.Chrome()
+        self._driv:webdriver = driv
 
+    def needDriver(self):
+        if self._driv:
+            pass
+        else:
+            self._driv = webdriver.Chrome()
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
@@ -232,6 +237,7 @@ class WILLHANDLE:
 
 
     def willis_moodle_connection(self, username: str, password: str):
+        self.needDriver()
         self.__willis_college_connection(username, password)
         self.__willis_to_moodle()
 
@@ -241,6 +247,7 @@ class WILLHANDLE:
         :param url: The path to open
         :return: None
         """
+        self.needDriver()
         self._driv.get(url)
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
