@@ -206,6 +206,10 @@ class WILLHANDLE:
         find all the URL inside the webpage that have the word quiz
         :return: all the quiz URL from this web
         """
+        try:
+            WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'drawer drawer-left show d-print-none')))  # Should ensure that the index is open
+        except Exception as e:
+            print(f'find the class for the index as error : {e}')
         self.ensure_index_is_open()  # Ensure the index of the course is open
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.ID, 'theme_boost-drawers-courseindex')))  # Should ensure that the index is open
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
