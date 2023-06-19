@@ -94,39 +94,42 @@ def main():
         with open(willisAnswerFile, 'w') as f:
             json.dump({}, f, indent=4)
             print('file created')
-    driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
+    uin = input('Want to search for questions (y): ')
+    if uin.lower() == 'y':
+        driver: WILLHANDLE.WILLHANDLE = needAccessToWebsite(path_to_user_data, path_key, 'Willis_College_user')
 
-    #driver.open_specific_url('https://students.willisonline.ca/mod/quiz/review.php?attempt=324086&cmid=216799')
-    #driver.get_question_answer_dict('test')
+        #driver.open_specific_url('https://students.willisonline.ca/mod/quiz/review.php?attempt=324086&cmid=216799')
+        #driver.get_question_answer_dict('test')
 
-    driver.open_specific_url(course_Section_url)
-    course_url = driver.get_all_course()
+        driver.open_specific_url(course_Section_url)
+        course_url = driver.get_all_course()
 
-    for course in course_url:
-        driver.open_specific_url(course)  # should put on the URL of the website
-        quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
-        for quiz in quizs_url:
-            driver.open_specific_url(quiz)
-            quiz_link = driver.get_quiz_review()
-            if quiz_link != '':
-                addQuestionToDictionary(quiz_link, driver, willisAnswerFile)
-            else:
-                print('There is no link for the review')
+        for course in course_url:
+            driver.open_specific_url(course)  # should put on the URL of the website
+            quizs_url = driver.get_all_quiz_url_in_webpage()  # should find all the quizs URL
+            for quiz in quizs_url:
+                driver.open_specific_url(quiz)
+                quiz_link = driver.get_quiz_review()
+                if quiz_link != '':
+                    addQuestionToDictionary(quiz_link, driver, willisAnswerFile)
+                else:
+                    print('There is no link for the review')
 
+    # Get the questions data
 
-    r = regexCreator(userInput('word search: '))
-    jdata = {}  # initialisation
+    uin = userInput('word search: ')
     try:
-        with open(path_to_user_data,'r') as data:
-            uspassword = input('enter the password for the user file')
-            ukey, usalt = user.load_key_and_salt_from_file(path_key)
-            user.decrypt_data(path_to_user_data, uspassword, ukey, usalt)
-            jdata = openJsonData('.\\data.json')
+        with open(willisAnswerFile, 'r') as file:
+            jdata = json.load(file)
     except Exception as e:
-        print(f'There was an error with the file error : {e}')
-    questionList: list[[str,int]] = findAllMatchingQuestion(r, jdata)
-    for question in questionList:
-        print(f'{question[0]} the answer is : {jdata[question[0]]["answer"]}, from the course : {jdata[question[0]]["cours"]}')
+        print(f'The data do not exist error code : {e}')
+    while 'q' not in uin:
+        r = regexCreator(uin)
+        questionList: list[[str, int]] = findAllMatchingQuestion(r, jdata)
+        for question in questionList:
+            print(f'**{question[0]}\n -> the answer is : {jdata[question[0]]["answer"]},\n -> from the course : {jdata[question[0]]["cours"]}\n'
+                  f'-> There is {question[1]} occurence of the group\n')
+        uin = userInput('an other search ? : ')
 
 
 if __name__ == '__main__':
