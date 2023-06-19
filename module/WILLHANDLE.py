@@ -96,6 +96,20 @@ class WILLHANDLE:
 
     def get_question_answer_dict(self, courseType: str = None) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+        try:  # Try to find if there is a way to have all on one page
+            fullpage = soup.find('div', class_='card-body p-3').find('a', text='Show all questions on one page').get('href')
+            self.open_specific_url(fullpage)
+            soup = BeautifulSoup(self._driv.page_source,'html.parser')
+        except Exception as e:
+            print(f'there was a problem on having everything on one page error : {e}')
+            try:
+                soup.find('div', class_='drawer-toggler').click()
+                soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+                fullpage = soup.find('div', class_='card-body p-3').find('a', text='Show all questions on one page').get('href')
+                self.open_specific_url(fullpage)
+                soup = BeautifulSoup(self._driv.page_source, 'html.parser')
+            except Exception as e:
+                print(f'There is no button {e}')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
         for question_div in question_divs:

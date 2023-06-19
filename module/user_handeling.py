@@ -29,6 +29,8 @@ def willis_account_creation(username: str, password: str):
 def create_data_file(path_to_data, username: str, password: str, filePassword: str,keyPath) :
     data = willis_account_creation(username, password)
     # Create the file initially
+    if not os.path.isdir('userFile'):
+        os.mkdir('userFile')
     with open(path_to_data, 'w') as f:
         json.dump(data, f)
         f.flush()
