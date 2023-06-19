@@ -17,6 +17,7 @@ class WILLHANDLE:
         self.WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
         self._driv = webdriver.Chrome()
 
+
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
         try:
