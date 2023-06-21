@@ -23,6 +23,7 @@ class WILLHANDLE:
         else:
             self._driv = webdriver.Chrome()
 
+
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
         try:
@@ -126,6 +127,8 @@ class WILLHANDLE:
                 answer_text = []
                 for answer_div in answer_divs:
                     answer_text.append(answer_div.get_text())
+                if not answer_text:
+                    answer_text = 'No Data'
 
                 questions_dict[question_text] = {
                     'cours': courseType,

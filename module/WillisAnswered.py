@@ -36,7 +36,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :param pathToData:
         :return:None
         '''
-
+        self.__ensure_files_are_present()
         try :
             with open(self._DataPath, 'r') as file:
                 data = json.load(file)
@@ -126,8 +126,9 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                     self.__addQuestionToDictionary(quiz_link)  # Write the data in the json file
                 else:
                     print('There is no link for the review')  # Mension there is no data\
+        self._driv.close()
 
-    def find_answer_by_question(self, question:str):
+    def find_answer_by_question(self, question:str) -> dict:
         return self._jsonDictionary[question]
 
 
