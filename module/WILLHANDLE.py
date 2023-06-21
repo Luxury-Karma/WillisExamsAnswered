@@ -13,11 +13,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 class WILLHANDLE:
     def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None, driv: webdriver = None):
-        self.QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
-        self.WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
+        self.__QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
+        self.__WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
         self._driv:webdriver = driv
 
-    def needDriver(self):
+    def _needDriver(self):
         if self._driv:
             pass
         else:
@@ -44,7 +44,7 @@ class WILLHANDLE:
             print("An error occurred: ", e)
 
     def __willis_college_connection(self, willis_username: str, willis_password: str) -> None:
-        self._driv.get(self.WILLIS_WEB_SITE)
+        self._driv.get(self.__WILLIS_WEB_SITE)
 
         try:
             WebDriverWait(self._driv, 10).until(
@@ -80,7 +80,7 @@ class WILLHANDLE:
 
     # region get quiz data
 
-    def get_question_dict(self) -> dict:
+    def _get_question_dict(self) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
@@ -100,11 +100,11 @@ class WILLHANDLE:
         return questions_dict
 
 
-    def get_question_answer_dict(self, courseType: str = None) -> dict:
+    def _get_question_answer_dict(self, courseType: str = None) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         try:  # Try to find if there is a way to have all on one page
             fullpage = soup.find('div', class_='card-body p-3').find('a', text='Show all questions on one page').get('href')
-            self.open_specific_url(fullpage)
+            self._open_specific_url(fullpage)
             soup = BeautifulSoup(self._driv.page_source,'html.parser')
         except Exception as e:
             print(f'there was a problem on having everything on one page error : {e}')
@@ -112,7 +112,7 @@ class WILLHANDLE:
                 soup.find('div', class_='drawer-toggler').click()
                 soup = BeautifulSoup(self._driv.page_source, 'html.parser')
                 fullpage = soup.find('div', class_='card-body p-3').find('a', text='Show all questions on one page').get('href')
-                self.open_specific_url(fullpage)
+                self._open_specific_url(fullpage)
                 soup = BeautifulSoup(self._driv.page_source, 'html.parser')
             except Exception as e:
                 print(f'There is no button {e}')
@@ -135,12 +135,12 @@ class WILLHANDLE:
                 print(f'Error {e}')
         return questions_dict
 
-    def get_quiz(self, username, password) -> dict:
+    def _get_quiz(self, username, password) -> dict:
         self.__willis_college_connection(username, password)
         self.__willis_to_moodle()
         urls = self.__get_timeline_urls()
         for url in urls:
-            if re.fullmatch(self.QUIZ_DETECTION_REGEX, url):
+            if re.fullmatch(self.__QUIZ_DETECTION_REGEX, url):
                 self._driv.get(url)
                 break
 
@@ -150,10 +150,10 @@ class WILLHANDLE:
 
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'que')))
 
-        return self.get_question_answer_dict()
+        return self._get_question_answer_dict()
 
 
-    def get_quiz_review(self) -> str:
+    def _get_quiz_review(self) -> str:
         """
         When you are in a quiz URL find the button for the review and send the URL of the quiz
         :return: url
@@ -169,7 +169,7 @@ class WILLHANDLE:
 
 
 
-    def get_all_course(self) -> list[str]:
+    def _get_all_course(self) -> list[str]:
         """
         Get all the course from the correct URL
         :return: a list of the course links
@@ -187,7 +187,7 @@ class WILLHANDLE:
 
 
     # TODO: Fix the fact that if it is allready open on the moodle page it break. Probably solve with a try except
-    def ensure_index_is_open(self):
+    def _ensure_index_is_open(self):
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located(
             (By.CLASS_NAME, 'sr-only')))
 
@@ -207,7 +207,7 @@ class WILLHANDLE:
         else:
             pass
 
-    def get_all_quiz_url_in_webpage(self) -> list[str]:
+    def _get_all_quiz_url_in_webpage(self) -> list[str]:
         """
         find all the URL inside the webpage that have the word quiz
         :return: all the quiz URL from this web
@@ -216,7 +216,7 @@ class WILLHANDLE:
             WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.CLASS_NAME, 'drawer drawer-left show d-print-none')))  # Should ensure that the index is open
         except Exception as e:
             print(f'find the class for the index as error : {e}')
-        self.ensure_index_is_open()  # Ensure the index of the course is open
+        self._ensure_index_is_open()  # Ensure the index of the course is open
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.ID, 'theme_boost-drawers-courseindex')))  # Should ensure that the index is open
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         # TODO: NEED TO UPDATE THE CRAPE OUT OF THIS. I need it to correctly get the index. Go in it get every link and compare it to the REGEX to see if the link would work
@@ -229,32 +229,32 @@ class WILLHANDLE:
             for d in divisions:
                 print(d)
                 href = d.get('href')
-                if re.match(self.QUIZ_DETECTION_REGEX,href):
+                if re.match(self.__QUIZ_DETECTION_REGEX, href):
                     quizURL.append(href)
 
         return quizURL  # All the links for that webpage of quizs
 
 
 
-    def willis_moodle_connection(self, username: str, password: str):
-        self.needDriver()
+    def _willis_moodle_connection(self, username: str, password: str):
+        self._needDriver()
         self.__willis_college_connection(username, password)
         self.__willis_to_moodle()
 
-    def open_specific_url(self, url: str):
+    def _open_specific_url(self, url: str):
         """
         Open a specific URL from the same driver
         :param url: The path to open
         :return: None
         """
-        self.needDriver()
+        self._needDriver()
         self._driv.get(url)
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
     # endregion
 
     # region apply webpage data
-    def write_underneath_qtext(self, qa_text: str):
+    def _write_underneath_qtext(self, qa_text: str):
         """
         Writes answers from the provided string underneath each 'qtext' div on the current webpage.
         The text of the 'qtext' div is used as a key to get the corresponding answer from the string.
