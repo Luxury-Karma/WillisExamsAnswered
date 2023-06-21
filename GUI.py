@@ -42,7 +42,8 @@ class StartWidget(QWidget):
 
 class CreateDataBaseWidget(QWidget):  # Create a new widget
     def start_research_button_clicked(self):
-        text = self.input_data.toPlainText(self.input_data.toPlainText())
+        file_password = self.input_data.toPlainText()
+        Data.global_quiz_data_collecting(file_password)
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -63,6 +64,8 @@ class CreateDataBaseWidget(QWidget):  # Create a new widget
 
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)
+
+
 
 
 

@@ -78,7 +78,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         Open the willis website and connect
         :return: a driver at the connection page of willis
         """
-        with open(self._userPath, 'r') as profiler:
+        with open(self._userPath, 'rb', ) as profiler:
 
             profiler = profiler.read()
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
@@ -110,6 +110,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             print(f'{self._DataPath} created')
 
     def global_quiz_data_collecting(self, password:str):
+        #TODO: Update to have a check up if the json is decrypted
         self.__needAccessToWebsite('Willis_College_user', password)  # Open the moodle for the website
 
         self._open_specific_url(self._courseURL)  # Connect to all of the accessible courses
