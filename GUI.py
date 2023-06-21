@@ -132,7 +132,7 @@ class ResearchWidget(QWidget):
         self.words = words
         self.amount = amount
         self.Answer = []
-
+        self.Answer = Data.getQuestionFromPrompt(self.words)
         self.researchWord_label = QLabel(f'Regex search: {Data.regex}', self)
 
         self.table_widget = QTableWidget(self)
@@ -149,13 +149,13 @@ class ResearchWidget(QWidget):
         self.populate_table()  # Populate the table with data
 
     def populate_table(self):
-        self.Answer = Data.getQuestionFromPrompt(self.words)
         valid_rows = [(question, _) for question, _ in self.Answer if
                       Data.find_answer_by_question(question)['answer'] and 'No Data' not in
                       Data.find_answer_by_question(question)['answer']]
-        row_count = len(valid_rows)
+        row_count = self.amount  # Set the row count to the specified amount
         self.table_widget.setRowCount(row_count)
         active_answer = 0
+        row_number = 0  # Track the current row number
         for row, (question, _) in enumerate(valid_rows):
             if active_answer >= self.amount:
                 break
@@ -168,9 +168,10 @@ class ResearchWidget(QWidget):
             question_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
             answer_item = QTableWidgetItem(strAnswer)
             answer_item.setTextAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            self.table_widget.setItem(row, 0, question_item)
-            self.table_widget.setItem(row, 1, answer_item)
+            self.table_widget.setItem(row_number, 0, question_item)
+            self.table_widget.setItem(row_number, 1, answer_item)
             active_answer += 1
+            row_number += 1  # Increment the row number
         self.table_widget.resizeRowsToContents()  # Adjust row heights to fit content
 
     def resizeEvent(self, event):
