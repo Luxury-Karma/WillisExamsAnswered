@@ -1,13 +1,10 @@
-import os
 import json
+import os
+
 from cryptography.fernet import Fernet
-from cryptography.fernet import Fernet
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-from cryptography.hazmat.backends import default_backend
-import os
-import warnings
-import base64
 
 
 def data_detection(path_to_create):
@@ -26,7 +23,7 @@ def willis_account_creation(username: str, password: str):
     return {'Willis_College_user': {'username': username, 'password': password}}
 
 
-def create_data_file(path_to_data, username: str, password: str, filePassword: str,keyPath) :
+def create_data_file(path_to_data, username: str, password: str, filePassword: str, keyPath):
     data = willis_account_creation(username, password)
     # Create the file initially
     if not os.path.isdir('userFile'):
@@ -46,6 +43,7 @@ def generate_base_key_and_salt():
 
 
 import base64
+
 
 def derive_key(base_key, base_salt, password, iterations=100000):
     kdf = PBKDF2HMAC(
@@ -100,4 +98,3 @@ def decrypt_data(encrypted_data, password, base_key, base_salt):
     decrypted_data = cipher.decrypt(encrypted_data)
 
     return decrypted_data
-

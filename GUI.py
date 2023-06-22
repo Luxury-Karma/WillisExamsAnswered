@@ -1,9 +1,7 @@
 import sys
 
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget, QVBoxLayout, \
-    QTableWidget, QTableWidgetItem
-from PyQt5.QtGui import QTextOption
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget
 from module import WillisAnswered
 
 
@@ -12,10 +10,11 @@ Data = WillisAnswered.DataHandle()
 class StartWidget(QWidget):
     switch_to_create_account_signal = pyqtSignal()
     switch_to_get_research_signal = pyqtSignal(str, int)
-    switch_back_signal = pyqtSignal()  # New signal for back button
 
     def emit_switch_to_create_account_signal(self):
         self.switch_to_create_account_signal.emit()
+
+
 
     def search_data(self):
         word_search = self.word_input.text()
@@ -26,8 +25,7 @@ class StartWidget(QWidget):
             amount = 100
         self.switch_to_get_research_signal.emit(word_search, amount)
 
-    def emit_switch_back_signal(self):
-        self.switch_back_signal.emit()  # Emit the back signal
+
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -54,12 +52,15 @@ class StartWidget(QWidget):
         self.create_database_button = QPushButton('Create Database', self)
         layout.addWidget(self.create_database_button)
 
-        self.back_button = QPushButton('Back', self)  # Add the back button
-        layout.addWidget(self.back_button)
-        self.back_button.clicked.connect(self.emit_switch_back_signal)  # Connect back button to emit the signal
+        self.AccountCreationButton = QPushButton('Input Loggins Credential', self)  # Add the back button
+        layout.addWidget(self.AccountCreationButton)
+        self.AccountCreationButton.clicked.connect(self.emit_switch_to_create_account_signal)  # Connect back button to emit the signal
 
 
-class CreateDataBaseWidget(QWidget): # Create a new widget
+
+class CreateDataBaseWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
     def start_research_button_clicked(self):
         file_password = self.input_data.toPlainText()
         Data.global_quiz_data_collecting(file_password)
@@ -80,45 +81,59 @@ class CreateDataBaseWidget(QWidget): # Create a new widget
         layout.addWidget(self.start_research_button)
         self.start_research_button.clicked.connect(self.start_research_button_clicked)
 
-
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
 
 
 class CreateAccountBaseWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
     def __init__(self, parent):
         super().__init__(parent)
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        self.account_input_label = QLabel('Willis College account:', self)  # Get the account
+        self.account_input_label = QLabel('Willis College account:', self)
         layout.addWidget(self.account_input_label)
 
-        self.account_input_data = QTextEdit(self)  # Get the username
+        self.account_input_data = QTextEdit(self)
         layout.addWidget(self.account_input_data)
 
         self.account_password_input_label = QLabel('Willis College password :', self)
         layout.addWidget(self.account_password_input_label)
 
-        self.account_password_input_data = QTextEdit(self)  # Get the password
+        self.account_password_input_data = QTextEdit(self)
         layout.addWidget(self.account_password_input_data)
 
         self.file_password_input_label = QLabel('password to encrypt the file :', self)
         layout.addWidget(self.file_password_input_label)
 
-        self.file_password_input_data = QTextEdit(self)  # Get the password
+        self.file_password_input_data = QTextEdit(self)
         layout.addWidget(self.file_password_input_data)
 
         self.create_account_button = QPushButton('Send', self)
         layout.addWidget(self.create_account_button)
         self.create_account_button.clicked.connect(self.create_account)
 
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+
     def create_account(self):
         user = self.account_input_data.toPlainText()
         password = self.account_password_input_data.toPlainText()
         filepassword = self.file_password_input_data.toPlainText()
+        # TODO: Verify if we have a decription file allready (is yes use that file and do not create a new one AND if there is a profile.JSON overwrite it
         Data.willis_user_creation(user, password, filepassword)
-
+        self.switch_back_signal.emit()
 
 
 
@@ -127,12 +142,18 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 class ResearchWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
     def __init__(self, parent, words: str, amount: int):
         super().__init__(parent)
         self.words = words
         self.amount = amount
         self.Answer = []
         self.Answer = Data.getQuestionFromPrompt(self.words)
+
         self.researchWord_label = QLabel(f'Regex search: {Data.regex}', self)
 
         self.table_widget = QTableWidget(self)
@@ -143,6 +164,9 @@ class ResearchWidget(QWidget):
         self.table_widget.setWordWrap(True)  # Enable text wrapping for the cells
 
         layout = QVBoxLayout(self)
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
         layout.addWidget(self.researchWord_label)
         layout.addWidget(self.table_widget)
 
@@ -183,41 +207,55 @@ class ResearchWidget(QWidget):
 
 
 class MainWindow(QMainWindow):
-
     def __init__(self):
         super().__init__()
         self.setWindowTitle('Willis Student Question Answer Database')
         self.setGeometry(100, 100, 300, 300)
 
+        self.init_start_widget()
+
+    def init_start_widget(self):
         self.start_widget = StartWidget(self)
 
-        self.create_database_widget = CreateDataBaseWidget(self)
-        self.create_account_widget = CreateAccountBaseWidget(self)
+        # Connect signals from start widget
+        self.start_widget.create_database_button.clicked.connect(self.switch_to_create_widget)
+        self.start_widget.switch_to_get_research_signal.connect(self.switch_to_research_widget)
+        self.start_widget.switch_to_create_account_signal.connect(self.switch_to_user_creation)
 
         self.setCentralWidget(self.start_widget)
 
-        self.start_widget.create_database_button.clicked.connect(self.switch_to_create_widget)
-        self.create_database_widget.back_button.clicked.connect(self.switch_to_start_widget)
-        self.start_widget.switch_to_get_research_signal.connect(self.switch_to_research_widget)
+    def init_create_database_widget(self):
+        self.create_database_widget = CreateDataBaseWidget(self)
 
-
-        self.start_widget.switch_to_create_account_signal.connect(self.switch_to_user_creation)
-
-    def switch_to_create_widget(self):
+        # Connect back signals from other widgets
+        self.create_database_widget.switch_back_signal.connect(self.switch_to_start_widget)
 
         self.setCentralWidget(self.create_database_widget)
 
-    def switch_to_start_widget(self):
-        self.setCentralWidget(self.start_widget)
+    def init_create_account_widget(self):
+        self.create_account_widget = CreateAccountBaseWidget(self)
 
-    def switch_to_research_widget(self, words_search: str, question_amount: int):
-        self.resize(800, 600)
-        self.setCentralWidget(ResearchWidget(self, words_search, question_amount))
+        # Connect back signals from other widgets
+        self.create_account_widget.switch_back_signal.connect(self.switch_to_start_widget)
 
-    def switch_to_user_creation(self):
         self.setCentralWidget(self.create_account_widget)
 
+    def switch_to_create_widget(self):
+        self.init_create_database_widget()
 
+    def switch_to_start_widget(self):
+        self.init_start_widget()
+        self.resize(300, 300)  # Restore original window size
+
+
+    def switch_to_research_widget(self, words_search: str, question_amount: int):
+        self.research_widget = ResearchWidget(self, words_search, question_amount)
+        self.research_widget.switch_back_signal.connect(self.switch_to_start_widget)  # Connect back signal
+        self.resize(800, 600)
+        self.setCentralWidget(self.research_widget)
+
+    def switch_to_user_creation(self):
+        self.init_create_account_widget()
 
 
 if __name__ == '__main__':
@@ -225,3 +263,4 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
+

@@ -1,10 +1,9 @@
-import re
 import json
-import time
+import os
+import re
 
 from module import WILLHANDLE
 from module import user_handeling as user
-import os
 
 
 class DataHandle(WILLHANDLE.WILLHANDLE):
@@ -19,7 +18,6 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self.regex = regex
         self._jsonDictionary = jsonDic if jsonDic else self.__openJsonData()
         self._courseURL: str = courseURL if courseURL else 'https://students.willisonline.ca/my/courses.php'
-
 
     def __regexCreator(self, searchedWords: list[str]) -> None:
         '''
@@ -37,7 +35,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :return:None
         '''
         self.__ensure_files_are_present()
-        try :
+        try:
             with open(self._DataPath, 'r') as file:
                 data = json.load(file)
         except Exception as e:
@@ -46,7 +44,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
 
     def __findAllMatchingQuestion(self) -> list[[str, int]]:
 
-        questionList:list[list[str, int]] = []
+        questionList: list[list[str, int]] = []
         for question in self._jsonDictionary.keys():
             # Detect similar wording
             if re.search(self.regex, question.lower()):
@@ -73,13 +71,12 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         with open(self._DataPath, 'w') as NewQAData:
             json.dump(existingData, NewQAData, indent=4)
 
-    def __needAccessToWebsite(self, userSection : str, password: str) -> None:
+    def __needAccessToWebsite(self, userSection: str, password: str) -> None:
         """
         Open the willis website and connect
         :return: a driver at the connection page of willis
         """
         with open(self._userPath, 'rb', ) as profiler:
-
             profiler = profiler.read()
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
             profiler = user.decrypt_data(profiler, password, key, salt)
@@ -109,8 +106,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                 json.dump({}, f, indent=4)
             print(f'{self._DataPath} created')
 
-    def global_quiz_data_collecting(self, password:str):
-        #TODO: Update to have a check up if the json is decrypted
+    def global_quiz_data_collecting(self, password: str):
+        # TODO: Update to have a check up if the json is decrypted
         self.__needAccessToWebsite('Willis_College_user', password)  # Open the moodle for the website
 
         self._open_specific_url(self._courseURL)  # Connect to all of the accessible courses
@@ -128,9 +125,5 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                     print('There is no link for the review')  # Mension there is no data\
         self._driv.close()
 
-    def find_answer_by_question(self, question:str) -> dict:
+    def find_answer_by_question(self, question: str) -> dict:
         return self._jsonDictionary[question]
-
-
-
-
