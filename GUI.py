@@ -1,11 +1,14 @@
 import sys
 
 from PyQt5.QtCore import pyqtSignal, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QTextEdit, QWidget
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, \
+    QTextEdit, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout
+
+
 from module import WillisAnswered
 
-
 Data = WillisAnswered.DataHandle()
+
 
 class StartWidget(QWidget):
     switch_to_create_account_signal = pyqtSignal()
@@ -13,8 +16,6 @@ class StartWidget(QWidget):
 
     def emit_switch_to_create_account_signal(self):
         self.switch_to_create_account_signal.emit()
-
-
 
     def search_data(self):
         word_search = self.word_input.text()
@@ -24,8 +25,6 @@ class StartWidget(QWidget):
             print(f'Not a number setting default amount : {e}')
             amount = 100
         self.switch_to_get_research_signal.emit(word_search, amount)
-
-
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -54,8 +53,8 @@ class StartWidget(QWidget):
 
         self.AccountCreationButton = QPushButton('Input Loggins Credential', self)  # Add the back button
         layout.addWidget(self.AccountCreationButton)
-        self.AccountCreationButton.clicked.connect(self.emit_switch_to_create_account_signal)  # Connect back button to emit the signal
-
+        self.AccountCreationButton.clicked.connect(
+            self.emit_switch_to_create_account_signal)  # Connect back button to emit the signal
 
 
 class CreateDataBaseWidget(QWidget):
@@ -74,7 +73,8 @@ class CreateDataBaseWidget(QWidget):
         self.input_label = QLabel('Password Of the password File:', self)
         layout.addWidget(self.input_label)
 
-        self.input_data = QTextEdit(self)
+        self.input_data = QLineEdit(self)
+        self.input_data.setEchoMode(QLineEdit.Password)
         layout.addWidget(self.input_data)
 
         self.start_research_button = QPushButton('START', self)
@@ -100,20 +100,23 @@ class CreateAccountBaseWidget(QWidget):
         self.account_input_label = QLabel('Willis College account:', self)
         layout.addWidget(self.account_input_label)
 
-        self.account_input_data = QTextEdit(self)
+        self.account_input_data = QLineEdit(self)
         layout.addWidget(self.account_input_data)
 
         self.account_password_input_label = QLabel('Willis College password :', self)
         layout.addWidget(self.account_password_input_label)
 
-        self.account_password_input_data = QTextEdit(self)
+        self.account_password_input_data = QLineEdit(self)
+        self.account_password_input_data.setEchoMode(QLineEdit.Password)
         layout.addWidget(self.account_password_input_data)
 
         self.file_password_input_label = QLabel('password to encrypt the file :', self)
         layout.addWidget(self.file_password_input_label)
 
-        self.file_password_input_data = QTextEdit(self)
+        self.file_password_input_data = QLineEdit(self)
+        self.file_password_input_data.setEchoMode(QLineEdit.Password)
         layout.addWidget(self.file_password_input_data)
+
 
         self.create_account_button = QPushButton('Send', self)
         layout.addWidget(self.create_account_button)
@@ -126,20 +129,13 @@ class CreateAccountBaseWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
-
     def create_account(self):
-        user = self.account_input_data.toPlainText()
-        password = self.account_password_input_data.toPlainText()
-        filepassword = self.file_password_input_data.toPlainText()
-        # TODO: Verify if we have a decription file allready (is yes use that file and do not create a new one AND if there is a profile.JSON overwrite it
+        user = self.account_input_data.text()
+        password = self.account_password_input_data.text()
+        filepassword = self.file_password_input_data.text()
         Data.willis_user_creation(user, password, filepassword)
         self.switch_back_signal.emit()
 
-
-
-
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
 class ResearchWidget(QWidget):
     switch_back_signal = pyqtSignal()
@@ -247,7 +243,6 @@ class MainWindow(QMainWindow):
         self.init_start_widget()
         self.resize(300, 300)  # Restore original window size
 
-
     def switch_to_research_widget(self, words_search: str, question_amount: int):
         self.research_widget = ResearchWidget(self, words_search, question_amount)
         self.research_widget.switch_back_signal.connect(self.switch_to_start_widget)  # Connect back signal
@@ -263,4 +258,3 @@ if __name__ == '__main__':
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
-

@@ -91,8 +91,10 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :param fpassword: The password encrypting the file
         :return: None
         """
-        if not user.data_detection(self._userPath):
-            user.create_data_file(self._userPath, username, password, fpassword, self._keyPath)
+
+        user.create_data_file(self._userPath, username, password, fpassword, self._keyPath)
+
+
 
     def getQuestionFromPrompt(self, search: str):
         self.__regexCreator(search.lower().split())
