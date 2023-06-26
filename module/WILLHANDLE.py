@@ -1,7 +1,7 @@
 import re
 import time
 import urllib
-from typing import List
+from typing import List, Any
 from urllib.parse import urlparse
 
 from bs4 import *
@@ -27,6 +27,12 @@ class WILLHANDLE:
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
+        """
+        Connnect with the Microsoft connection
+        :param username: Microsoft Email
+        :param password: Microsoft email's password
+        :return: None
+        """
         try:
             WebDriverWait(self._driv, 10).until(EC.presence_of_element_located((By.NAME, 'loginfmt')))
             input_field = self._driv.find_element(By.NAME, 'loginfmt')
@@ -46,6 +52,12 @@ class WILLHANDLE:
             print("An error occurred: ", e)
 
     def __willis_college_connection(self, willis_username: str, willis_password: str) -> None:
+        """
+        Connect to willis college homepage
+        :param willis_username: The Willis student email address to connect
+        :param willis_password: The willis student email's password to connect
+        :return: None
+        """
         self._driv.get(self.__WILLIS_WEB_SITE)
 
         try:
@@ -62,6 +74,10 @@ class WILLHANDLE:
             self.__microsoft_connection(willis_username, willis_password)
 
     def __willis_to_moodle(self) -> str:
+        """
+        Pass from the willis website to the willis moodle
+        :return: the current URL
+        """
         try:
             WebDriverWait(self._driv, 20).until(EC.element_to_be_clickable((By.LINK_TEXT, 'Moodle')))
             self._driv.find_element(By.LINK_TEXT, 'Moodle').click()
@@ -72,19 +88,27 @@ class WILLHANDLE:
         except Exception as e:
             print("An error occurred: ", e)
 
-    def __get_timeline_urls(self) -> list[str]:
+    def __get_timeline_urls(self) -> list[Any]:
+        """
+        Try to get all the time line urls
+        :return:
+        """
         try:
             divs = self._driv.find_elements(By.XPATH,
                                             '//div[@class="list-group-item timeline-event-list-item flex-column pt-2 pb-0 border-0 px-2" and @data-region="event-list-item"]')
             return [div.find_element(By.TAG_NAME, 'a').get_attribute('href') for div in divs]
         except:
-            return None
+            return []
 
     # endregion
 
     # region get quiz data
 
     def _get_question_dict(self) -> dict:
+        """
+        Get all the question from the webpage and the answer. Ensure that there is an answers
+        :return: dictionary of all the question and answer
+        """
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         question_divs = soup.find_all('div', class_='que')
         questions_dict = {}
@@ -103,18 +127,25 @@ class WILLHANDLE:
                 }
         return questions_dict
 
-    def _get_all_quizs_specific_cours(self, course_link: str, username: str, password: str) -> list[str]:
+    def _get_all_quiz_specific_courses(self, course_link: str, username: str, password: str) -> list[str]:
+        """
+        Go inside a course, find all the quiz link
+        :param course_link: The URL where the course is
+        :param username: willis username
+        :param password: willise password
+        :return: all of quiz's url from the course
+        """
         if not self._got_connection_to_willis:  # Ensure a connections with moodle have been made
             self._willis_moodle_connection(username, password)
         self._open_specific_url(course_link)
         return self._get_all_quiz_url_in_webpage()
 
-
-
-
-
-
-    def _get_question_answer_dict(self, courseType: str = None) -> dict:
+    def _get_question_answer_dict(self, course_type: str = '') -> dict:
+        """
+        Open in a review URL, find all the question and there answer
+        :param course_type: The type of the course (the name)
+        :return: Dictionary of the question and answer
+        """
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')
         try:  # Try to find if there is a way to have all on one page
             fullpage = soup.find('div', class_='card-body p-3').find('a', text='Show all questions on one page').get(
@@ -143,18 +174,22 @@ class WILLHANDLE:
                 answer_text = []
                 for answer_div in answer_divs:
                     answer_text.append(answer_div.get_text())
-                if not answer_text:
-                    answer_text = 'No Data'
-
-                questions_dict[question_text] = {
-                    'cours': courseType,
-                    'answer': answer_text if answer_text else None
-                }
+                if answer_text:  # Ensure there is an answer. Do not keep empty data
+                    questions_dict[question_text] = {
+                        'cours': course_type,
+                        'answer': answer_text
+                    }
             except Exception as e:
                 print(f'Error {e}')
         return questions_dict
 
     def _get_quiz(self, username, password) -> dict:
+        """
+        Get all the quiz from the timeline (quiz of the day)
+        :param username: email to go to willis college
+        :param password: password to go to willis college
+        :return: Dictionary of all the quizs question and answers
+        """
         self.__willis_college_connection(username, password)
         self.__willis_to_moodle()
         urls = self.__get_timeline_urls()
@@ -202,8 +237,11 @@ class WILLHANDLE:
                 allurl.append(anchor.get('href'))
         return allurl
 
-    # TODO: Fix the fact that if it is allready open on the moodle page it break. Probably solve with a try except
-    def _ensure_index_is_open(self):
+    def _ensure_index_is_open(self) -> None:
+        """
+        When entering a course ensure that the index is open for further work on the page
+        :return: None
+        """
         WebDriverWait(self._driv, 10).until(EC.presence_of_element_located(
             (By.CLASS_NAME, 'sr-only')))
 
@@ -252,12 +290,18 @@ class WILLHANDLE:
 
         return quizURL  # All the links for that webpage of quizs
 
-    def _willis_moodle_connection(self, username: str, password: str):
+    def _willis_moodle_connection(self, username: str, password: str) -> None:
+        """
+        Easy way to connect to moodle.
+        :param username: email to willis college
+        :param password: password of the email
+        :return: None
+        """
         self._needDriver()
         self.__willis_college_connection(username, password)
         self.__willis_to_moodle()
 
-    def _open_specific_url(self, url: str):
+    def _open_specific_url(self, url: str) -> None:
         """
         Open a specific URL from the same driver
         :param url: The path to open
@@ -270,7 +314,7 @@ class WILLHANDLE:
     # endregion
 
     # region apply webpage data
-    def _write_underneath_qtext(self, qa_text: str):
+    def _write_underneath_question_text(self, qa_text: str):
         """
         Writes answers from the provided string underneath each 'qtext' div on the current webpage.
         The text of the 'qtext' div is used as a key to get the corresponding answer from the string.
@@ -311,19 +355,9 @@ class WILLHANDLE:
     # endregion
 
 
-def display(questions_dict):
-    for question_id, question_data in questions_dict.items():
-        print(f"Question ID: {question_id}")
-        print(f"Question Text: {question_data['question_text']}")
-        if question_data['answers']:
-            print("Answers:")
-            for answer in question_data['answers']:
-                print(answer)
-
-
-def click_specific_btn(driv, attr_btn: str, tag_btn: str):
+def click_specific_btn(driver, attr_btn: str, tag_btn: str):
     try:
-        button = WebDriverWait(driv, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f"{tag_btn}[{attr_btn}]")))
+        button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, f"{tag_btn}[{attr_btn}]")))
         button.click()
-    except:
-        print("Button not found.")
+    except Exception as e:
+        print("Button not found.", e)

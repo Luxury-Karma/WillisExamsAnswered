@@ -154,7 +154,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                 profiler = json.loads(profiler)
                 username = profiler[user_section]['username']
                 password = profiler[user_section]['password']
-        for e in self._get_all_quizs_specific_cours(course_link, username, password):
+        for e in self._get_all_quiz_specific_courses(course_link, username, password):
             self._open_specific_url(e)
             self.__add_question_to_dictionary(self._get_quiz_review())
 
