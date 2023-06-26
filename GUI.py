@@ -148,7 +148,7 @@ class ResearchWidget(QWidget):
         self.words = words
         self.amount = amount
         self.Answer = []
-        self.Answer = Data.getQuestionFromPrompt(self.words)
+        self.Answer = Data.get_question_from_prompt(self.words)
 
         self.researchWord_label = QLabel(f'Regex search: {Data.regex}', self)
 
@@ -182,7 +182,7 @@ class ResearchWidget(QWidget):
     def start_new_search(self):
         # Slot to start a new search
         self.words = self.new_search_line_edit.text()
-        self.Answer = Data.getQuestionFromPrompt(self.words)
+        self.Answer = Data.get_question_from_prompt(self.words)
         self.researchWord_label.setText(f'Regex search: {Data.regex}')
         self.populate_table()
 
