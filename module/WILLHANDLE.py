@@ -1,6 +1,7 @@
 import re
 import time
 import urllib
+from typing import List
 from urllib.parse import urlparse
 
 from bs4 import *
@@ -16,6 +17,7 @@ class WILLHANDLE:
         self.__QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
         self.__WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
         self._driv: webdriver = driv
+        self._got_connection_to_willis: bool = False
 
     def _needDriver(self):
         if self._driv:
@@ -65,7 +67,7 @@ class WILLHANDLE:
             self._driv.find_element(By.LINK_TEXT, 'Moodle').click()
 
             self._driv.switch_to.window(self._driv.window_handles[-1])
-
+            self._got_connection_to_willis = True
             return self._driv.current_url
         except Exception as e:
             print("An error occurred: ", e)
@@ -94,12 +96,23 @@ class WILLHANDLE:
             answer_text = []
             for answer_div in answer_divs:
                 answer_text.append(answer_div.get_text())
-
-            questions_dict[question_id] = {
-                'question_text': question_text,
-                'answers': answer_text if answer_text else None
-            }
+            if answer_text:  # Ensure there is an answer. It is useless to keep them if we do not have the answer
+                questions_dict[question_id] = {
+                    'question_text': question_text,
+                    'answers': answer_text
+                }
         return questions_dict
+
+    def _get_all_quizs_specific_cours(self, course_link: str, username: str, password: str) -> list[str]:
+        if not self._got_connection_to_willis:  # Ensure a connections with moodle have been made
+            self._willis_moodle_connection(username, password)
+        self._open_specific_url(course_link)
+        return self._get_all_quiz_url_in_webpage()
+
+
+
+
+
 
     def _get_question_answer_dict(self, courseType: str = None) -> dict:
         soup = BeautifulSoup(self._driv.page_source, 'html.parser')

@@ -163,10 +163,28 @@ class ResearchWidget(QWidget):
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)
         self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+        self.new_search_line_edit = QLineEdit(self)  # Add the line edit
+        layout.addWidget(self.new_search_line_edit)
+
+        self.new_search_button = QPushButton('New Search', self)  # Add the button
+        layout.addWidget(self.new_search_button)
+
         layout.addWidget(self.researchWord_label)
         layout.addWidget(self.table_widget)
 
+        # Connect the button click and line edit returnPressed signal to a new slot
+        self.new_search_button.clicked.connect(self.start_new_search)
+        self.new_search_line_edit.returnPressed.connect(self.start_new_search)
+
         self.populate_table()  # Populate the table with data
+
+    def start_new_search(self):
+        # Slot to start a new search
+        self.words = self.new_search_line_edit.text()
+        self.Answer = Data.getQuestionFromPrompt(self.words)
+        self.researchWord_label.setText(f'Regex search: {Data.regex}')
+        self.populate_table()
 
     def populate_table(self):
         valid_rows = [(question, _) for question, _ in self.Answer if

@@ -1,7 +1,6 @@
 import json
 import os
 import re
-
 from module import WILLHANDLE
 from module import user_handeling as user
 
@@ -18,6 +17,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self.regex = regex
         self._jsonDictionary = jsonDic if jsonDic else self.__openJsonData()
         self._courseURL: str = courseURL if courseURL else 'https://students.willisonline.ca/my/courses.php'
+        self.__password_entered: str = ''
 
     def __regexCreator(self, searchedWords: list[str]) -> None:
         '''
@@ -47,9 +47,12 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         questionList: list[list[str, int]] = []
         for question in self._jsonDictionary.keys():
             # Detect similar wording
-            if re.search(self.regex, question.lower()):
-                questionList.append([question, len(re.findall(self.regex, question.lower()))])
-        questionList.sort(key=lambda x: x[1], reverse=True)  # sort from the highest match amount
+            match = re.findall(self.regex, question.lower())
+            if match:
+                unique_matches = len(set(match))  # Count unique matches
+                total_matches = len(match)  # Count total matches
+                questionList.append([question, (unique_matches, total_matches)])
+        questionList.sort(key=lambda x: (x[1][0], x[1][1]), reverse=True)  # sort by unique matches, then total matches
         return questionList
 
     def __addQuestionToDictionary(self, urlOfQuiz: str):
@@ -76,6 +79,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         Open the willis website and connect
         :return: a driver at the connection page of willis
         """
+        self.__password_entered = password
         with open(self._userPath, 'rb', ) as profiler:
             profiler = profiler.read()
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
@@ -93,6 +97,36 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         """
 
         user.create_data_file(self._userPath, username, password, fpassword, self._keyPath)
+
+
+    def willis_add_question(self, link_of_review: str, userSection: str):
+        username:str = ''
+        password:str = ''
+        if not self._got_connection_to_willis:
+            with open(self._userPath, 'rb', ) as profiler:
+                profiler = profiler.read()
+                key, salt = user.load_key_and_salt_from_file(self._keyPath)
+                profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+                profiler = json.loads(profiler)
+                username = profiler[userSection]['username']
+                password = profiler[userSection]['password']
+        self.__addQuestionToDictionary(link_of_review)
+
+    def willis_add_course_questions(self, course_link: str, userSection: str):
+        username: str = ''
+        password: str = ''
+        if not self._got_connection_to_willis:
+            with open(self._userPath, 'rb', ) as profiler:
+                profiler = profiler.read()
+                key, salt = user.load_key_and_salt_from_file(self._keyPath)
+                profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+                profiler = json.loads(profiler)
+                username = profiler[userSection]['username']
+                password = profiler[userSection]['password']
+        for e in self._get_all_quizs_specific_cours(course_link, username, password):
+            self._open_specific_url(e)
+            self.__addQuestionToDictionary(self._get_quiz_review())
+
 
 
 
