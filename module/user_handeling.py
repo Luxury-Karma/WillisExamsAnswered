@@ -8,45 +8,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-
-def data_detection(path_to_create):
-    """
-    Ensure that the file with the user data exists
-    :return: if the file exists
-    """
-    return os.path.isfile(path_to_create)
-
-
-def willis_account_creation(username: str, password: str) -> dict:
-    """
-    Create the format for Willis accounts
-    :param username: Willis email
-    :param password: Willis email's password
-    :return: The dictionary formatted correctly
-    """
-    return {'Willis_College_user': {'username': username, 'password': password}}
-
-
-def create_data_file(path_to_data, username: str, password: str, file_password: str, key_path) -> None:
-    """
-    Create the files for handling connections with willis college's website
-    :param path_to_data: The path for the json file
-    :param username: The willis email
-    :param password: The email's password
-    :param file_password: the file's password
-    :param key_path: the path to the key file
-    :return: None
-    """
-    data = willis_account_creation(username, password)
-    # Create the file initially
-    if not os.path.isdir('userFile'):
-        os.mkdir('userFile')
-    with open(path_to_data, 'w') as f:
-        json.dump(data, f)
-        f.flush()
-    base_key, base_salt = generate_base_key_and_salt()
-    save_key_and_salt_to_file(base_key, base_salt, key_path)
-    encrypt_file(path_to_data, file_password, base_key, base_salt)
+# region Key handling
 
 
 def generate_base_key_and_salt() -> tuple[bytes, bytes]:
@@ -80,6 +42,32 @@ def derive_key(base_key, base_salt, password, iterations=100000) -> bytes:
     return derived_key_base64
 
 
+def create_data_file(path_to_data, username: str, password: str, file_password: str, key_path) -> None:
+    """
+    Create the files for handling connections with willis college's website
+    :param path_to_data: The path for the json file
+    :param username: The willis email
+    :param password: The email's password
+    :param file_password: the file's password
+    :param key_path: the path to the key file
+    :return: None
+    """
+    data = willis_account_creation(username, password)
+    # Create the file initially
+    if not os.path.isdir('userFile'):
+        os.mkdir('userFile')
+    with open(path_to_data, 'w') as f:
+        json.dump(data, f)
+        f.flush()
+    base_key, base_salt = generate_base_key_and_salt()
+    save_key_and_salt_to_file(base_key, base_salt, key_path)
+    encrypt_file(path_to_data, file_password, base_key, base_salt)
+
+# endregion
+
+
+# region save to file
+
 def save_key_and_salt_to_file(key, salt, file_name: str) -> None:
     """
     Save the key and the salt to a file
@@ -94,6 +82,38 @@ def save_key_and_salt_to_file(key, salt, file_name: str) -> None:
         file.write(key_encoded)
         file.write('\n')  # Add a newline to separate key and salt
         file.write(salt_encoded)
+
+
+def willis_account_creation(username: str, password: str) -> dict:
+    """
+    Create the format for Willis accounts
+    :param username: Willis email
+    :param password: Willis email's password
+    :return: The dictionary formatted correctly
+    """
+    return {'Willis_College_user': {'username': username, 'password': password}}
+
+
+def data_detection(path_to_create):
+    """
+    Ensure that the file with the user data exists
+    :return: if the file exists
+    """
+    return os.path.isfile(path_to_create)
+
+# endregion
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def load_key_and_salt_from_file(file_name: str) -> tuple[bytes, bytes]:
