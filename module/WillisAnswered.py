@@ -137,6 +137,16 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             profiler = json.loads(profiler)
             self._willis_moodle_connection(profiler[user_section]['username'], profiler[user_section]['password'])
 
+    def __handle_non_connection(self, user_section) -> list[str]:
+        with open(self._userPath, 'rb', ) as profiler:
+            profiler = profiler.read()
+            key, salt = user.load_key_and_salt_from_file(self._keyPath)
+            profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+            profiler = json.loads(profiler)
+            username = profiler[user_section]['username']
+            password = profiler[user_section]['password']
+        return [username,password]
+
     def willis_add_course_questions(self, course_link: str, user_section: str) -> None:
         """
         Get in a specific course URL, find all of the quizs and get the question and answer of each of them
@@ -156,9 +166,12 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                 password = profiler[user_section]['password']
         for e in self._get_all_quiz_specific_courses(course_link, username, password):
             self._open_specific_url(e)
-            self.__add_question_to_dictionary(self._get_quiz_review())
+            self._get_question_answer_dict(self._get_quiz_review())
 
-    # endregion
+    def willis_add_specific_review(self, quiz_url):
+
+
+        # endregion
 
     def __ensure_files_are_present(self) -> None:
         """

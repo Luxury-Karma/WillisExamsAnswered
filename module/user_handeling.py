@@ -42,6 +42,46 @@ def derive_key(base_key, base_salt, password, iterations=100000) -> bytes:
     return derived_key_base64
 
 
+def encrypt_file(filename, password, base_key, base_salt) -> None:
+    """
+    Encrypt the profile file with password, key, salt
+    :param filename: The file of the user
+    :param password: password for the file
+    :param base_key: the key for the file
+    :param base_salt: the salt for the file
+    :return: None
+    """
+    cipher = Fernet(derive_key(base_key, base_salt, password))
+
+    with open(filename, 'rb') as file:
+        file_data = file.read()
+
+    encrypted_data = cipher.encrypt(file_data)
+
+    with open(filename, 'wb') as encrypted_file:
+        encrypted_file.write(base_salt + encrypted_data)
+
+    print(f"File '{filename}' encrypted successfully. Encrypted file: '{filename}'")
+
+
+def decrypt_data(encrypted_data, password, base_key, base_salt) -> bytes:
+    """
+    Decrypt the user file data
+    :param encrypted_data: The encrypted data
+    :param password: The file's password
+    :param base_key:  The file's key
+    :param base_salt: The file's password
+    :return: Decrypted data
+    """
+    cipher = Fernet(derive_key(base_key, base_salt, password))
+
+    encrypted_data = encrypted_data[16:]  # Extract the encrypted data from the file
+
+    decrypted_data = cipher.decrypt(encrypted_data)
+
+    return decrypted_data
+
+
 def create_data_file(path_to_data, username: str, password: str, file_password: str, key_path) -> None:
     """
     Create the files for handling connections with willis college's website
@@ -104,16 +144,7 @@ def data_detection(path_to_create):
 # endregion
 
 
-
-
-
-
-
-
-
-
-
-
+# region load
 
 
 def load_key_and_salt_from_file(file_name: str) -> tuple[bytes, bytes]:
@@ -129,42 +160,4 @@ def load_key_and_salt_from_file(file_name: str) -> tuple[bytes, bytes]:
     salt = base64.urlsafe_b64decode(salt_encoded)
     return key, salt
 
-
-def encrypt_file(filename, password, base_key, base_salt) -> None:
-    """
-    Encrypt the profile file with password, key, salt
-    :param filename: The file of the user
-    :param password: password for the file
-    :param base_key: the key for the file
-    :param base_salt: the salt for the file
-    :return: None
-    """
-    cipher = Fernet(derive_key(base_key, base_salt, password))
-
-    with open(filename, 'rb') as file:
-        file_data = file.read()
-
-    encrypted_data = cipher.encrypt(file_data)
-
-    with open(filename, 'wb') as encrypted_file:
-        encrypted_file.write(base_salt + encrypted_data)
-
-    print(f"File '{filename}' encrypted successfully. Encrypted file: '{filename}'")
-
-
-def decrypt_data(encrypted_data, password, base_key, base_salt) -> bytes:
-    """
-    Decrypt the user file data
-    :param encrypted_data: The encrypted data
-    :param password: The file's password
-    :param base_key:  The file's key
-    :param base_salt: The file's password
-    :return: Decrypted data
-    """
-    cipher = Fernet(derive_key(base_key, base_salt, password))
-
-    encrypted_data = encrypted_data[16:]  # Extract the encrypted data from the file
-
-    decrypted_data = cipher.decrypt(encrypted_data)
-
-    return decrypted_data
+# endregion
