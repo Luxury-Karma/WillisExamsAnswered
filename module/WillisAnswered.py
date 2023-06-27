@@ -81,7 +81,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         with open(self._DataPath, 'w') as NewQAData:
             json.dump(existing_data, NewQAData, indent=4)
 
-    def willis_add_question(self, link_of_review: str, user_section: str):
+    def willis_add_specific_quiz_review(self, link_of_review: str, user_section: str):
         """
         Add to the data dictionary a specific URL worth of data
         :param link_of_review: The exact URL of the review you want to add
@@ -98,6 +98,35 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                 password = profiler[user_section]['password']
                 self._willis_moodle_connection(username, password)
         self.__add_question_to_dictionary(link_of_review)
+
+    def manualy_add_question_answer(self, question: str, answer: str, course_type: str) -> None:
+        """
+        Receive a question, answer, course type and add it to the dictionarry
+        :return: None
+        """
+        newdata: dict = {f'{question}': {
+            'cours': course_type,
+            'answer': answer
+        }}
+        self._jsonDictionary.update(newdata)
+        with open(self._DataPath, 'a') as file:
+            file.write('\n')  # Add a newline character before appending new data
+            json.dump(newdata, file)
+
+    # TODO: add data verification
+    def give_json_data(self, path_to_data: str) -> None:
+        """
+        Give a formated json file and add it to the data
+        careful in this version there is no data verification
+        :param path_to_data: The path where the json file is
+        :return: None
+        """
+        with open(path_to_data, 'rw') as new_file:
+            new_data = json.loads(new_file.read())
+            self._jsonDictionary.update(new_data)
+            with open(self._DataPath,'a') as js:
+                js.write('\n')
+                json.dump(new_data, js)
 
     def willis_user_creation(self, username: str, password: str, file_password: str) -> None:
         """
@@ -168,10 +197,9 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             self._open_specific_url(e)
             self._get_question_answer_dict(self._get_quiz_review())
 
-    def willis_add_specific_review(self, quiz_url):
 
 
-        # endregion
+    # endregion
 
     def __ensure_files_are_present(self) -> None:
         """

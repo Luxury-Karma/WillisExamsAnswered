@@ -183,7 +183,7 @@ class WILLHANDLE:
                 print(f'Error {e}')
         return questions_dict
 
-    def _get_quiz(self, username, password) -> dict:
+    def _get_quiz_from_timeline(self, username, password) -> dict:
         """
         Get all the quiz from the timeline (quiz of the day)
         :param username: email to go to willis college

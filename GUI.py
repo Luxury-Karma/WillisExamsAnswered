@@ -13,9 +13,13 @@ Data = WillisAnswered.DataHandle()
 class StartWidget(QWidget):
     switch_to_create_account_signal = pyqtSignal()
     switch_to_get_research_signal = pyqtSignal(str, int)
+    switch_to_update_database_signal = pyqtSignal()  # new signal for update database
 
     def emit_switch_to_create_account_signal(self):
         self.switch_to_create_account_signal.emit()
+
+    def emit_switch_to_update_database_signal(self):
+        self.switch_to_update_database_signal.emit()  # new method to emit signal
 
     def search_data(self):
         word_search = self.word_input.text()
@@ -44,13 +48,21 @@ class StartWidget(QWidget):
         self.number_input = QLineEdit(self)
         layout.addWidget(self.number_input)
 
+        # Bring to the research page
         self.research_button = QPushButton('Research', self)
         layout.addWidget(self.research_button)
         self.research_button.clicked.connect(self.search_data)
 
+        # Bring to the menu going trought all of willis college to collect data
         self.create_database_button = QPushButton('Create Database', self)
         layout.addWidget(self.create_database_button)
 
+        # Bring to the other options to modify the data base
+        self.update_database_button = QPushButton('Update Database', self)
+        layout.addWidget(self.update_database_button)
+        self.update_database_button.clicked.connect(self.emit_switch_to_update_database_signal)
+
+        # Bring to create the account needed for the program to work
         self.AccountCreationButton = QPushButton('Input Loggins Credential', self)  # Add the back button
         layout.addWidget(self.AccountCreationButton)
         self.AccountCreationButton.clicked.connect(
@@ -61,7 +73,7 @@ class CreateDataBaseWidget(QWidget):
     switch_back_signal = pyqtSignal()
 
     def start_research_button_clicked(self):
-        file_password = self.input_data.toPlainText()
+        file_password = self.input_data.text()
         Data.global_quiz_data_collecting(file_password)
 
     def __init__(self, parent):
@@ -87,6 +99,150 @@ class CreateDataBaseWidget(QWidget):
 
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
+
+
+class UpdateDatabaseWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+    switch_to_manual_qa_signal = pyqtSignal()
+    switch_to_json_file_signal = pyqtSignal()
+    switch_to_review_link_signal = pyqtSignal()
+    switch_to_course_link_signal = pyqtSignal()
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        # Create buttons for various update operations
+        self.manual_qa_button = QPushButton('Manually give a question and answer', self)
+        layout.addWidget(self.manual_qa_button)
+        self.manual_qa_button.clicked.connect(self.switch_to_manual_qa_signal.emit)
+
+        self.json_file_button = QPushButton('Give me a JSON file', self)
+        layout.addWidget(self.json_file_button)
+        self.json_file_button.clicked.connect(self.switch_to_json_file_signal.emit)
+
+        self.review_link_button = QPushButton('Give me a link to a review', self)
+        layout.addWidget(self.review_link_button)
+        self.review_link_button.clicked.connect(self.switch_to_review_link_signal.emit)
+
+        self.course_link_button = QPushButton('Give me a link to a course', self)
+        layout.addWidget(self.course_link_button)
+        self.course_link_button.clicked.connect(self.switch_to_course_link_signal.emit)
+
+        # Create back button
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.switch_back_signal.emit)
+
+
+class ManualQAWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+    def __init__(self, parent=None):
+        super(ManualQAWidget, self).__init__(parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.url_label = QLabel('Enter the question : ', self)
+
+        self.question_line = QLineEdit()
+        layout.addWidget(self.question_line)
+
+        self.answer_label = QLabel('Enter the answer : ', self)
+        layout.addWidget(self.url_label)  # Add the label to the layout
+        self.answer_line = QLineEdit()
+        layout.addWidget(self.answer_line)
+
+        self.courtse_type_label = QLabel('Enter the course Type: ', self)
+        layout.addWidget(self.courtse_type_label)  # Add the label to the layout
+        self.course_type_line = QLineEdit()
+        layout.addWidget(self.course_type_line)
+
+        self.send_button = QPushButton('Send', self)
+        layout.addWidget(self.send_button)
+        # Connect send button to some function
+
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+
+class JsonFileWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+    def __init__(self, parent=None):
+        super(JsonFileWidget, self).__init__(parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.file_path_line = QLineEdit()
+        layout.addWidget(self.file_path_line)
+
+        self.send_button = QPushButton('Send', self)
+        layout.addWidget(self.send_button)
+        # Connect send button to some function
+
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+
+class ReviewLinkWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+    def __init__(self, parent=None):
+        super(ReviewLinkWidget, self).__init__(parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+
+        self.url_line = QLineEdit()
+        layout.addWidget(self.url_line)
+
+        self.send_button = QPushButton('Send', self)
+        layout.addWidget(self.send_button)
+        # Connect send button to some function
+
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
+
+
+class CourseLinkWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+    def __init__(self, parent=None):
+        super(CourseLinkWidget, self).__init__(parent)
+
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        self.url_label = QLabel('URL of the course: ', self)
+
+        self.url_line = QLineEdit()
+        layout.addWidget(self.url_line)
+
+        self.send_button = QPushButton('Send', self)
+        layout.addWidget(self.send_button)
+        # Connect send button to some function
+
+        self.back_button = QPushButton('Back', self)
+        layout.addWidget(self.back_button)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
 
 
 class CreateAccountBaseWidget(QWidget):
@@ -128,6 +284,8 @@ class CreateAccountBaseWidget(QWidget):
 
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
+
+
 
     def create_account(self):
         user = self.account_input_data.text()
@@ -235,6 +393,7 @@ class MainWindow(QMainWindow):
         self.start_widget.create_database_button.clicked.connect(self.switch_to_create_widget)
         self.start_widget.switch_to_get_research_signal.connect(self.switch_to_research_widget)
         self.start_widget.switch_to_create_account_signal.connect(self.switch_to_user_creation)
+        self.start_widget.switch_to_update_database_signal.connect(self.switch_to_update_database_widget)
 
         self.setCentralWidget(self.start_widget)
 
@@ -254,6 +413,22 @@ class MainWindow(QMainWindow):
 
         self.setCentralWidget(self.create_account_widget)
 
+    def init_manual_qa_widget(self):
+        self.manual_qa_widget = ManualQAWidget(self)
+        self.manual_qa_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+
+    def init_json_file_widget(self):
+        self.json_file_widget = JsonFileWidget(self)
+        self.json_file_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+
+    def init_review_link_widget(self):
+        self.review_link_widget = ReviewLinkWidget(self)
+        self.review_link_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+
+    def init_course_link_widget(self):
+        self.course_link_widget = CourseLinkWidget(self)
+        self.course_link_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+
     def switch_to_create_widget(self):
         self.init_create_database_widget()
 
@@ -269,6 +444,39 @@ class MainWindow(QMainWindow):
 
     def switch_to_user_creation(self):
         self.init_create_account_widget()
+
+    def init_update_database_widget(self):
+        self.update_database_widget = UpdateDatabaseWidget(self)
+
+        # Connect back signal
+        self.update_database_widget.switch_back_signal.connect(self.switch_to_start_widget)
+
+        # Connect signals to switch to other widgets
+        self.update_database_widget.switch_to_manual_qa_signal.connect(self.switch_to_manual_qa_widget)
+        self.update_database_widget.switch_to_json_file_signal.connect(self.switch_to_json_file_widget)
+        self.update_database_widget.switch_to_review_link_signal.connect(self.switch_to_review_link_widget)
+        self.update_database_widget.switch_to_course_link_signal.connect(self.switch_to_course_link_widget)
+
+        self.setCentralWidget(self.update_database_widget)
+
+    def switch_to_update_database_widget(self):
+        self.init_update_database_widget()
+
+    def switch_to_manual_qa_widget(self):
+        self.init_manual_qa_widget()
+        self.setCentralWidget(self.manual_qa_widget)
+
+    def switch_to_json_file_widget(self):
+        self.init_json_file_widget()
+        self.setCentralWidget(self.json_file_widget)
+
+    def switch_to_review_link_widget(self):
+        self.init_review_link_widget()
+        self.setCentralWidget(self.review_link_widget)
+
+    def switch_to_course_link_widget(self):
+        self.init_course_link_widget()
+        self.setCentralWidget(self.course_link_widget)
 
 
 if __name__ == '__main__':
