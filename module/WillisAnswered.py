@@ -118,17 +118,23 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     # TODO: add data verification
     def give_json_data(self, path_to_data: str) -> None:
         """
-        Give a formated json file and add it to the data
+        Give a formatted json file and add it to the data
         careful in this version there is no data verification
         :param path_to_data: The path where the json file is
         :return: None
         """
-        with open(path_to_data, 'rw') as new_file:
-            new_data = json.loads(new_file.read())
-            self._jsonDictionary.update(new_data)
-            with open(self._DataPath,'a') as js:
-                js.write('\n')
-                json.dump(new_data, js)
+        try:
+            with open(path_to_data, 'r') as new_file:
+                new_data = json.load(new_file)
+                self._jsonDictionary.update(new_data)
+
+            with open(self._DataPath, 'w') as file:
+                json.dump(self._jsonDictionary, file, indent=4)
+
+        except IOError as io_err:
+            print(f"IOError: {io_err}")
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
 
     def willis_user_creation(self, username: str, password: str, file_password: str) -> None:
         """

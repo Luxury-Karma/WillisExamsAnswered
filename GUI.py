@@ -185,6 +185,10 @@ class JsonFileWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
+    def send_data(self):
+        path = self.file_path_line.text()
+        Data.give_json_data(path)
+
     def __init__(self, parent=None):
         super(JsonFileWidget, self).__init__(parent)
 
@@ -197,6 +201,8 @@ class JsonFileWidget(QWidget):
 
         self.send_button = QPushButton('Send', self)
         layout.addWidget(self.send_button)
+        self.send_button.clicked.connect(self.send_data)
+
         # Connect send button to some function
 
         self.back_button = QPushButton('Back', self)
