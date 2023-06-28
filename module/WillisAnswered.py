@@ -104,14 +104,16 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         Receive a question, answer, course type and add it to the dictionarry
         :return: None
         """
-        newdata: dict = {f'{question}': {
+        #self._jsonDictionary is allready the full data of the file loaded
+        newdata: dict = {  # Create the data of the dictionary
             'cours': course_type,
             'answer': answer
-        }}
-        self._jsonDictionary.update(newdata)
-        with open(self._DataPath, 'a') as file:
-            file.write('\n')  # Add a newline character before appending new data
-            json.dump(newdata, file)
+        }
+        self._jsonDictionary[question] = newdata  # Add the new data inside of the existing loaded data
+
+        with open(self._DataPath, 'w') as file:
+            json.dump(self._jsonDictionary, file, indent=4)
+
 
     # TODO: add data verification
     def give_json_data(self, path_to_data: str) -> None:

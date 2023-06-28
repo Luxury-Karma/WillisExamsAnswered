@@ -143,18 +143,23 @@ class ManualQAWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
+    def send_data(self):
+        self.answer_label.text()
+        Data.manualy_add_question_answer(self.question_line.text(), self.answer_line.text(), self.course_type_line.text())
+
     def __init__(self, parent=None):
         super(ManualQAWidget, self).__init__(parent)
 
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.url_label = QLabel('Enter the question : ', self)
+        layout.addWidget(self.url_label)
 
         self.question_line = QLineEdit()
         layout.addWidget(self.question_line)
 
         self.answer_label = QLabel('Enter the answer : ', self)
-        layout.addWidget(self.url_label)  # Add the label to the layout
+        layout.addWidget(self.answer_label)  # Add the label to the layout
         self.answer_line = QLineEdit()
         layout.addWidget(self.answer_line)
 
@@ -165,11 +170,13 @@ class ManualQAWidget(QWidget):
 
         self.send_button = QPushButton('Send', self)
         layout.addWidget(self.send_button)
+        self.send_button.clicked.connect(self.send_data)
         # Connect send button to some function
 
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)
         self.back_button.clicked.connect(self.emit_switch_back_signal)
+
 
 
 class JsonFileWidget(QWidget):
@@ -183,7 +190,8 @@ class JsonFileWidget(QWidget):
 
         layout = QVBoxLayout()
         self.setLayout(layout)
-
+        self.url_label = QLabel('Enter The path to the json : ', self)
+        layout.addWidget(self.url_label)
         self.file_path_line = QLineEdit()
         layout.addWidget(self.file_path_line)
 
@@ -207,7 +215,8 @@ class ReviewLinkWidget(QWidget):
 
         layout = QVBoxLayout()
         self.setLayout(layout)
-
+        self.url_label = QLabel('Enter the link to the review :', self)
+        layout.addWidget(self.url_label)
         self.url_line = QLineEdit()
         layout.addWidget(self.url_line)
 
