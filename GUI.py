@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, \
-    QTextEdit, QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout
+     QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout
 
 
 from module import WillisAnswered
@@ -22,13 +22,16 @@ class StartWidget(QWidget):
         self.switch_to_update_database_signal.emit()  # new method to emit signal
 
     def search_data(self):
-        word_search = self.word_input.text()
         try:
-            amount = int(self.number_input.text())
+            word_search = self.word_input.text()
+            try:
+                amount = int(self.number_input.text())
+            except Exception as e:
+                print(f'Not a number setting default amount : {e}')
+                amount = 100
+            self.switch_to_get_research_signal.emit(word_search, amount)
         except Exception as e:
-            print(f'Not a number setting default amount : {e}')
-            amount = 100
-        self.switch_to_get_research_signal.emit(word_search, amount)
+            print(f'Button error {e}')
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -73,8 +76,11 @@ class CreateDataBaseWidget(QWidget):
     switch_back_signal = pyqtSignal()
 
     def start_research_button_clicked(self):
-        file_password = self.input_data.text()
-        Data.global_quiz_data_collecting(file_password)
+        try:
+            file_password = self.input_data.text()
+            Data.global_quiz_data_collecting(file_password)
+        except Exception as e:
+            print(f'Button error {e}')
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -144,9 +150,11 @@ class ManualQAWidget(QWidget):
         self.switch_back_signal.emit()
 
     def send_data(self):
-        self.answer_label.text()
-        Data.manualy_add_question_answer(self.question_line.text(), self.answer_line.text(), self.course_type_line.text())
-
+        try:
+            self.answer_label.text()
+            Data.manualy_add_question_answer(self.question_line.text(), self.answer_line.text(), self.course_type_line.text())
+        except Exception as e:
+            print(f'Button error {e}')
     def __init__(self, parent=None):
         super(ManualQAWidget, self).__init__(parent)
 
@@ -217,9 +225,12 @@ class ReviewLinkWidget(QWidget):
         self.switch_back_signal.emit()
 
     def send_data(self):
-        quiz_link = self.url_line.text()
-        password = self.file_password.text()
-        Data.willis_add_specific_quiz_review(quiz_link, 'Willis_College_user', password)
+        try:
+            quiz_link = self.url_line.text()
+            password = self.file_password.text()
+            Data.willis_add_specific_quiz_review(quiz_link, 'Willis_College_user', password)
+        except Exception as e:
+            print(f'Button error {e}')
 
     def __init__(self, parent=None):
         super(ReviewLinkWidget, self).__init__(parent)
@@ -253,10 +264,12 @@ class CourseLinkWidget(QWidget):
         self.switch_back_signal.emit()
 
     def send(self):
-        password = self.file_password.text()
-        link = self.url_line.text()
-        Data.willis_add_course_questions(link, 'Willis_College_user', password)
-        pass
+        try:
+            password = self.file_password.text()
+            link = self.url_line.text()
+            Data.willis_add_course_questions(link, 'Willis_College_user', password)
+        except Exception as e:
+            print(f'Button error {e}')
     def __init__(self, parent=None):
         super(CourseLinkWidget, self).__init__(parent)
 
@@ -327,12 +340,14 @@ class CreateAccountBaseWidget(QWidget):
 
 
     def create_account(self):
-        user = self.account_input_data.text()
-        password = self.account_password_input_data.text()
-        filepassword = self.file_password_input_data.text()
-        Data.willis_user_creation(user, password, filepassword)
-        self.switch_back_signal.emit()
-
+        try:
+            user = self.account_input_data.text()
+            password = self.account_password_input_data.text()
+            filepassword = self.file_password_input_data.text()
+            Data.willis_user_creation(user, password, filepassword)
+            self.switch_back_signal.emit()
+        except Exception as e:
+            print(f'Button error {e}')
 
 class ResearchWidget(QWidget):
     switch_back_signal = pyqtSignal()
@@ -378,11 +393,13 @@ class ResearchWidget(QWidget):
 
     def start_new_search(self):
         # Slot to start a new search
-        self.words = self.new_search_line_edit.text()
-        self.Answer = Data.get_question_from_prompt(self.words)
-        self.researchWord_label.setText(f'Regex search: {Data.regex}')
-        self.populate_table()
-
+        try:
+            self.words = self.new_search_line_edit.text()
+            self.Answer = Data.get_question_from_prompt(self.words)
+            self.researchWord_label.setText(f'Regex search: {Data.regex}')
+            self.populate_table()
+        except Exception as e:
+            print(f'Button error {e}')
     def populate_table(self):
         valid_rows = [(question, _) for question, _ in self.Answer if
                       Data.find_answer_by_question(question)['answer'] and 'No Data' not in
@@ -410,12 +427,14 @@ class ResearchWidget(QWidget):
         self.table_widget.resizeRowsToContents()  # Adjust row heights to fit content
 
     def resizeEvent(self, event):
-        super().resizeEvent(event)
+        try:
+            super().resizeEvent(event)
 
-        table_width = self.width()
-        column_0_width = table_width // 2
-        self.table_widget.setColumnWidth(0, column_0_width)
-
+            table_width = self.width()
+            column_0_width = table_width // 2
+            self.table_widget.setColumnWidth(0, column_0_width)
+        except Exception as e:
+            print(f'Button error {e}')
 
 class MainWindow(QMainWindow):
     def __init__(self):
