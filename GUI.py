@@ -216,6 +216,11 @@ class ReviewLinkWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
+    def send_data(self):
+        quiz_link = self.url_line.text()
+        password = self.file_password.text()
+        Data.willis_add_specific_quiz_review(quiz_link, 'Willis_College_user', password)
+
     def __init__(self, parent=None):
         super(ReviewLinkWidget, self).__init__(parent)
 
@@ -226,9 +231,15 @@ class ReviewLinkWidget(QWidget):
         self.url_line = QLineEdit()
         layout.addWidget(self.url_line)
 
+        self.file_password_label = QLabel('Enter the file password for user file :', self)
+        layout.addWidget(self.file_password_label)
+        self.file_password = QLineEdit()
+        self.file_password.setEchoMode(QLineEdit.Password)
+        layout.addWidget(self.file_password)
+
         self.send_button = QPushButton('Send', self)
         layout.addWidget(self.send_button)
-        # Connect send button to some function
+        self.send_button.clicked.connect(self.send_data)
 
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)

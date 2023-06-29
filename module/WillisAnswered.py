@@ -62,37 +62,55 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             print(f'{e} error in file')
         return data
 
+
+# TODO: Update the saving
     def __add_question_to_dictionary(self, url_quiz: str):
         """
         Update the Question list for you with a simple link
         :return: None
         """
         self._open_specific_url(url_quiz)  # go to the open quiz page
-        # add the data to the file
 
-        with open(self._DataPath, 'r') as QAData:
-            existing_data = json.load(QAData)
-            new_data = self._get_question_answer_dict()
-            try:
-                existing_data.update(new_data)
-            except Exception as e:
-                print(f'The dictionary was empty {e}')
+        new_data = self._get_question_answer_dict()
 
+        # Load existing data
+        try:
+            with open(self._DataPath, 'r') as QAData:
+                existing_data = json.load(QAData)
+        except FileNotFoundError:
+            print(f'The file {self._DataPath} does not exist. Creating a new one.')
+            existing_data = {}
+
+        # If existing_data is not a dictionary, we initialize it
+        if not isinstance(existing_data, dict):
+            print(f'Existing data is not a dictionary, initializing a new one.')
+            existing_data = {}
+
+        # If new data key exists in existing data, print a warning
+        intersecting_keys = set(existing_data.keys()).intersection(set(new_data.keys()))
+        if intersecting_keys:
+            print(f'Warning: New data keys {intersecting_keys} exist in existing data. They will be overwritten.')
+
+        # Update the data
+        existing_data.update(new_data)
+
+        # Write the updated data back to file
         with open(self._DataPath, 'w') as NewQAData:
             json.dump(existing_data, NewQAData, indent=4)
 
-    def willis_add_specific_quiz_review(self, link_of_review: str, user_section: str):
+    def willis_add_specific_quiz_review(self, link_of_review: str, user_section: str, file_password: str):
         """
         Add to the data dictionary a specific URL worth of data
         :param link_of_review: The exact URL of the review you want to add
         :param user_section: The name where the willis user is in the json file
+        :param file_password : The password to unlock user file
         :return: Nothing
         """
         if not self._got_connection_to_willis:
             with open(self._userPath, 'rb', ) as profiler:
                 profiler = profiler.read()
                 key, salt = user.load_key_and_salt_from_file(self._keyPath)
-                profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+                profiler = user.decrypt_data(profiler,file_password, key, salt)
                 profiler = json.loads(profiler)
                 username = profiler[user_section]['username']
                 password = profiler[user_section]['password']
