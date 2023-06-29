@@ -72,7 +72,11 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self._open_specific_url(url_quiz)  # go to the open quiz page
 
         new_data = self._get_question_answer_dict()
+        self.__add_data_to_json(new_data)
 
+
+
+    def __add_data_to_json(self, new_data: dict):
         # Load existing data
         try:
             with open(self._DataPath, 'r') as QAData:
@@ -93,6 +97,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
 
         # Update the data
         existing_data.update(new_data)
+        self._jsonDictionary = existing_data  # Update Object memory
 
         # Write the updated data back to file
         with open(self._DataPath, 'w') as NewQAData:
@@ -202,7 +207,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             password = profiler[user_section]['password']
         return [username,password]
 
-    def willis_add_course_questions(self, course_link: str, user_section: str) -> None:
+    def willis_add_course_questions(self, course_link: str, user_section: str, file_password: str) -> None:
         """
         Get in a specific course URL, find all of the quizs and get the question and answer of each of them
         :param course_link: Exact link of the course
@@ -215,13 +220,19 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             with open(self._userPath, 'rb', ) as profiler:
                 profiler = profiler.read()
                 key, salt = user.load_key_and_salt_from_file(self._keyPath)
-                profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+                profiler = user.decrypt_data(profiler, file_password, key, salt)
                 profiler = json.loads(profiler)
                 username = profiler[user_section]['username']
                 password = profiler[user_section]['password']
         for e in self._get_all_quiz_specific_courses(course_link, username, password):
             self._open_specific_url(e)
-            self._get_question_answer_dict(self._get_quiz_review())
+            try:
+                self._open_specific_url(self._get_quiz_review())
+                new_data: dict = self._get_question_answer_dict('')
+                self.__add_data_to_json(new_data)
+
+            except Exception as e:
+                print(f'No link {e}')
 
 
 

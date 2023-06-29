@@ -252,19 +252,32 @@ class CourseLinkWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
+    def send(self):
+        password = self.file_password.text()
+        link = self.url_line.text()
+        Data.willis_add_course_questions(link, 'Willis_College_user', password)
+        pass
     def __init__(self, parent=None):
         super(CourseLinkWidget, self).__init__(parent)
 
         layout = QVBoxLayout()
         self.setLayout(layout)
         self.url_label = QLabel('URL of the course: ', self)
+        layout.addWidget(self.url_label)
 
         self.url_line = QLineEdit()
         layout.addWidget(self.url_line)
 
+        self.file_password_label = QLabel('Enter the file password for user file :', self)
+        layout.addWidget(self.file_password_label)
+        self.file_password = QLineEdit()
+        self.file_password.setEchoMode(QLineEdit.Password)
+        layout.addWidget(self.file_password)
+
         self.send_button = QPushButton('Send', self)
         layout.addWidget(self.send_button)
-        # Connect send button to some function
+        self.send_button.clicked.connect(self.send)
+
 
         self.back_button = QPushButton('Back', self)
         layout.addWidget(self.back_button)
