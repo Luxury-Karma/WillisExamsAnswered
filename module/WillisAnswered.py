@@ -257,7 +257,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :param password: The password you gave to the encryption files
         :return: None
         """
-        self.__need_access_to_website(self.__user_section, password)  # Open the moodle for the website
+        self.__need_access_to_website(password)  # Open the moodle for the website
 
         self._open_specific_url(self._courseURL)  # Connect to all of the accessible courses
         course_url = self._get_all_course()  # get all the URL of the accessible courses
