@@ -225,7 +225,7 @@ class ReviewLinkWidget(QWidget):
 
     def send_data(self):
         try:
-            Data.willis_add_specific_quiz_review(self.url_line.text(), 'Willis_College_user', self.file_password.text())
+            Data.willis_add_specific_quiz_review(self.url_line.text(), self.file_password.text())
         except Exception as e:
             print(f'Button error {e}')
 
@@ -262,7 +262,7 @@ class CourseLinkWidget(QWidget):
 
     def send(self):
         try:
-            Data.willis_add_course_questions(self.url_line.text(), 'Willis_College_user', self.file_password.text())
+            Data.willis_add_course_questions(self.url_line.text(), self.file_password.text())
         except Exception as e:
             print(f'Button error {e}')
     def __init__(self, parent=None):
