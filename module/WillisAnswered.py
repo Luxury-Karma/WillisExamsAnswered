@@ -10,7 +10,9 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     def __init__(self, regex: str = None, jsonDic: dict = None, pathToData: str = None, pathToUser: str = None,
                  pathToKey: str = None, courseURL: str = None):
         super().__init__()
+
         self.__pyPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+        self.__user_dir = os.path.join(self.__pyPath, 'userFile')
         self._DataPath = pathToData if pathToData else os.path.join(self.__pyPath, 'userFile\\willisAnswer.json')
         self._userPath = pathToUser if pathToUser else os.path.join(self.__pyPath, 'userFile\\profile.json')
         self._keyPath = pathToKey if pathToKey else os.path.join(self.__pyPath, 'userFile\\decryption.txt')
@@ -18,10 +20,9 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self._jsonDictionary = jsonDic if jsonDic else self.__open_json_data()
         self._courseURL: str = courseURL if courseURL else 'https://students.willisonline.ca/my/courses.php'
         self.__password_entered: str = ''
-<<<<<<< HEAD
-=======
-        self.__user_section = user
->>>>>>> parent of fb967f3 (Version 1)
+
+        self.__user_section = 'Willis_College_user'
+
 
     # region Regex Usage
     def __regex_creator(self, searchedWords: list[str]) -> None:
@@ -107,11 +108,10 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         with open(self._DataPath, 'w') as NewQAData:
             json.dump(existing_data, NewQAData, indent=4)
 
-<<<<<<< HEAD
-    def willis_add_specific_quiz_review(self, link_of_review: str, user_section: str, file_password: str):
-=======
-    def willis_add_specific_quiz_review(self, link_of_review: str, self.__user_section: str, file_password: str):
->>>>>>> parent of fb967f3 (Version 1)
+
+
+    def willis_add_specific_quiz_review(self, link_of_review: str, file_password: str):
+
         """
         Add to the data dictionary a specific URL worth of data
         :param link_of_review: The exact URL of the review you want to add
@@ -120,19 +120,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :return: Nothing
         """
         if not self._got_connection_to_willis:
-            with open(self._userPath, 'rb', ) as profiler:
-                profiler = profiler.read()
-                key, salt = user.load_key_and_salt_from_file(self._keyPath)
-                profiler = user.decrypt_data(profiler,file_password, key, salt)
-                profiler = json.loads(profiler)
-<<<<<<< HEAD
-                username = profiler[user_section]['username']
-                password = profiler[user_section]['password']
-=======
-                username = profiler[self.__user_section]['username']
-                password = profiler[self.__user_section]['password']
->>>>>>> parent of fb967f3 (Version 1)
-                self._willis_moodle_connection(username, password)
+            self.__handle_non_connection(file_password)
+
         self.__add_question_to_dictionary(link_of_review)
 
     def manualy_add_question_answer(self, question: str, answer: str, course_type: str) -> None:
@@ -197,11 +186,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     # endregion
 
     # region Website Handling
-<<<<<<< HEAD
-    def __need_access_to_website(self, user_section: str, password: str) -> None:
-=======
-    def __need_access_to_website(self, self.__user_section: str, password: str) -> None:
->>>>>>> parent of fb967f3 (Version 1)
+
+    def __need_access_to_website(self: str, password: str) -> None:
         """
         Open the willis website and connect
         :return: a driver at the connection page of willis
@@ -212,33 +198,19 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
             profiler = user.decrypt_data(profiler, password, key, salt)
             profiler = json.loads(profiler)
-<<<<<<< HEAD
-            self._willis_moodle_connection(profiler[user_section]['username'], profiler[user_section]['password'])
-
-    def __handle_non_connection(self, user_section) -> list[str]:
-=======
             self._willis_moodle_connection(profiler[self.__user_section]['username'], profiler[self.__user_section]['password'])
 
-    def __handle_non_connection(self, self.__user_section) -> list[str]:
->>>>>>> parent of fb967f3 (Version 1)
-        with open(self._userPath, 'rb', ) as profiler:
-            profiler = profiler.read()
+    def __handle_non_connection(self, password: str) -> list[str]:
+
+        with open(self._userPath, 'rb') as profiler:
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
-            profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
-            profiler = json.loads(profiler)
-<<<<<<< HEAD
-            username = profiler[user_section]['username']
-            password = profiler[user_section]['password']
-        return [username,password]
+            profiler = json.loads(user.decrypt_data(profiler.read(), password, key, salt))
+            self._willis_moodle_connection(profiler[self.__user_section]['username'], profiler[self.__user_section]['password'] )
 
-    def willis_add_course_questions(self, course_link: str, user_section: str, file_password: str) -> None:
-=======
-            username = profiler[self.__user_section]['username']
-            password = profiler[self.__user_section]['password']
-        return [username,password]
 
-    def willis_add_course_questions(self, course_link: str, self.__user_section: str, file_password: str) -> None:
->>>>>>> parent of fb967f3 (Version 1)
+
+    def willis_add_course_questions(self, course_link: str, file_password: str) -> None:
+
         """
         Get in a specific course URL, find all of the quizs and get the question and answer of each of them
         :param course_link: Exact link of the course
@@ -248,18 +220,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         username: str = ''
         password: str = ''
         if not self._got_connection_to_willis:
-            with open(self._userPath, 'rb', ) as profiler:
-                profiler = profiler.read()
-                key, salt = user.load_key_and_salt_from_file(self._keyPath)
-                profiler = user.decrypt_data(profiler, file_password, key, salt)
-                profiler = json.loads(profiler)
-<<<<<<< HEAD
-                username = profiler[user_section]['username']
-                password = profiler[user_section]['password']
-=======
-                username = profiler[self.__user_section]['username']
-                password = profiler[self.__user_section]['password']
->>>>>>> parent of fb967f3 (Version 1)
+            self.__handle_non_connection(file_password)
         for e in self._get_all_quiz_specific_courses(course_link, username, password):
             self._open_specific_url(e)
             try:
@@ -279,6 +240,10 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         Protect the opening of the file if the files do not exist yet
         :return:
         """
+
+        if not os.path.isdir(self.__user_dir):
+            print(f'dir created : {self.__user_dir}')
+            os.mkdir(self.__user_dir)
         if not os.path.isfile(self._userPath):
             print(f'{self._userPath} created')
         if not os.path.isfile(self._DataPath):  # When we do not have the file of answer
@@ -292,7 +257,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :param password: The password you gave to the encryption files
         :return: None
         """
-        self.__need_access_to_website('Willis_College_user', password)  # Open the moodle for the website
+        self.__need_access_to_website(self.__user_section, password)  # Open the moodle for the website
 
         self._open_specific_url(self._courseURL)  # Connect to all of the accessible courses
         course_url = self._get_all_course()  # get all the URL of the accessible courses

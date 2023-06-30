@@ -1,7 +1,6 @@
 import json
 import os
 import base64
-from typing import Tuple
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
