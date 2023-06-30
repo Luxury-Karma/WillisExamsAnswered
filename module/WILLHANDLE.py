@@ -88,10 +88,6 @@ class WILLHANDLE:
         except Exception as e:
             print("An error occurred: ", e)
 
-    def _close_connection(self):
-        self._driv.quit()
-        self._got_connection_to_willis = False  # The driver is closed so there is no more connection
-
     def __get_timeline_urls(self) -> list[Any]:
         """
         Try to get all the time line urls

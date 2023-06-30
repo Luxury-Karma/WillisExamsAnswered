@@ -18,18 +18,16 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self._jsonDictionary = jsonDic if jsonDic else self.__open_json_data()
         self._courseURL: str = courseURL if courseURL else 'https://students.willisonline.ca/my/courses.php'
         self.__password_entered: str = ''
-        self.__user_section = user_selection if user_selection else 'Willis_College_user'
+        self.__user_section = user
 
     # region Regex Usage
-    def __regex_creator(self, search_words: list[str]) -> None:
+    def __regex_creator(self, searchedWords: list[str]) -> None:
         '''
         Apply the new regex search on the object
-        :param search_words: The words to make a search
+        :param searchedWords: The words to make a search
         :return: None
         '''
-        if self._got_connection_to_willis:
-            self._close_connection()
-        regex_string = '|'.join(search_words)
+        regex_string = '|'.join(searchedWords)
         self.regex = f'(?:{regex_string})'
 
     def __find_all_matching_question(self) -> list[[str, int]]:
@@ -65,6 +63,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
             print(f'{e} error in file')
         return data
 
+
+# TODO: Update the saving
     def __add_question_to_dictionary(self, url_quiz: str):
         """
         Update the Question list for you with a simple link
@@ -72,7 +72,10 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         """
         self._open_specific_url(url_quiz)  # go to the open quiz page
 
-        self.__add_data_to_json(self._get_question_answer_dict())
+        new_data = self._get_question_answer_dict()
+        self.__add_data_to_json(new_data)
+
+
 
     def __add_data_to_json(self, new_data: dict):
         # Load existing data
@@ -101,7 +104,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         with open(self._DataPath, 'w') as NewQAData:
             json.dump(existing_data, NewQAData, indent=4)
 
-    def willis_add_specific_quiz_review(self, link_of_review: str, file_password: str):
+    def willis_add_specific_quiz_review(self, link_of_review: str, self.__user_section: str, file_password: str):
         """
         Add to the data dictionary a specific URL worth of data
         :param link_of_review: The exact URL of the review you want to add
@@ -110,7 +113,14 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :return: Nothing
         """
         if not self._got_connection_to_willis:
-            self.__need_access_to_website(file_password)
+            with open(self._userPath, 'rb', ) as profiler:
+                profiler = profiler.read()
+                key, salt = user.load_key_and_salt_from_file(self._keyPath)
+                profiler = user.decrypt_data(profiler,file_password, key, salt)
+                profiler = json.loads(profiler)
+                username = profiler[self.__user_section]['username']
+                password = profiler[self.__user_section]['password']
+                self._willis_moodle_connection(username, password)
         self.__add_question_to_dictionary(link_of_review)
 
     def manualy_add_question_answer(self, question: str, answer: str, course_type: str) -> None:
@@ -175,19 +185,30 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     # endregion
 
     # region Website Handling
-    def __need_access_to_website(self, password: str) -> None:
+    def __need_access_to_website(self, self.__user_section: str, password: str) -> None:
         """
         Open the willis website and connect
         :return: a driver at the connection page of willis
         """
         self.__password_entered = password
         with open(self._userPath, 'rb', ) as profiler:
+            profiler = profiler.read()
             key, salt = user.load_key_and_salt_from_file(self._keyPath)
-            profiler = json.loads(user.decrypt_data(profiler.read(), password, key, salt))
+            profiler = user.decrypt_data(profiler, password, key, salt)
+            profiler = json.loads(profiler)
             self._willis_moodle_connection(profiler[self.__user_section]['username'], profiler[self.__user_section]['password'])
 
+    def __handle_non_connection(self, self.__user_section) -> list[str]:
+        with open(self._userPath, 'rb', ) as profiler:
+            profiler = profiler.read()
+            key, salt = user.load_key_and_salt_from_file(self._keyPath)
+            profiler = user.decrypt_data(profiler, self.__password_entered, key, salt)
+            profiler = json.loads(profiler)
+            username = profiler[self.__user_section]['username']
+            password = profiler[self.__user_section]['password']
+        return [username,password]
 
-    def willis_add_course_questions(self, course_link: str, file_password: str) -> None:
+    def willis_add_course_questions(self, course_link: str, self.__user_section: str, file_password: str) -> None:
         """
         Get in a specific course URL, find all of the quizs and get the question and answer of each of them
         :param course_link: Exact link of the course
@@ -197,7 +218,13 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         username: str = ''
         password: str = ''
         if not self._got_connection_to_willis:
-            self.__need_access_to_website(file_password)
+            with open(self._userPath, 'rb', ) as profiler:
+                profiler = profiler.read()
+                key, salt = user.load_key_and_salt_from_file(self._keyPath)
+                profiler = user.decrypt_data(profiler, file_password, key, salt)
+                profiler = json.loads(profiler)
+                username = profiler[self.__user_section]['username']
+                password = profiler[self.__user_section]['password']
         for e in self._get_all_quiz_specific_courses(course_link, username, password):
             self._open_specific_url(e)
             try:
@@ -230,8 +257,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :param password: The password you gave to the encryption files
         :return: None
         """
-        if not self._got_connection_to_willis:  # if needed open the website
-            self.__need_access_to_website(password)
+        self.__need_access_to_website('Willis_College_user', password)  # Open the moodle for the website
 
         self._open_specific_url(self._courseURL)  # Connect to all of the accessible courses
         course_url = self._get_all_course()  # get all the URL of the accessible courses
@@ -246,7 +272,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                     self.__add_question_to_dictionary(quiz_link)  # Write the data in the json file
                 else:
                     print('There is no link for the review')  # Mension there is no data\
-
+        self._driv.close()
+        self._got_connection_to_willis = False  # The driver is closed so there is no more connection
 
     def find_answer_by_question(self, question: str) -> dict:
         """
