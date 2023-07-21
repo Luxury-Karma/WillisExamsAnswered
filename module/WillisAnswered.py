@@ -26,11 +26,11 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
 
     # region Regex Usage
     def __regex_creator(self, searchedWords: list[str]) -> None:
-        '''
+        """
         Apply the new regex search on the object
         :param searchedWords: The words to make a search
         :return: None
-        '''
+        """
         regex_string = '|'.join(searchedWords)
         self.regex = f'(?:{regex_string})'
 
