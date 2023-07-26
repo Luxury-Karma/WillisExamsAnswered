@@ -23,7 +23,8 @@ class WILLHANDLE:
         if self._driv:
             pass
         else:
-            self._driv = webdriver.Chrome()
+            self._driv = webdriver.Firefox()
+
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
