@@ -2,7 +2,7 @@ import sys
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, \
-     QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout
+     QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QRadioButton,QFileDialog
 
 
 from module import WillisAnswered
@@ -14,9 +14,13 @@ class StartWidget(QWidget):
     switch_to_create_account_signal = pyqtSignal()
     switch_to_get_research_signal = pyqtSignal(str, int)
     switch_to_update_database_signal = pyqtSignal()  # new signal for update database
+    switch_to_setting_signal = pyqtSignal()  # signal to go to setting
 
     def emit_switch_to_create_account_signal(self):
         self.switch_to_create_account_signal.emit()
+
+    def emit_switch_to_setting_signal(self):
+        self.switch_to_setting_signal.emit()
 
     def emit_switch_to_update_database_signal(self):
         self.switch_to_update_database_signal.emit()  # new method to emit signal
@@ -70,6 +74,14 @@ class StartWidget(QWidget):
         layout.addWidget(self.AccountCreationButton)
         self.AccountCreationButton.clicked.connect(
             self.emit_switch_to_create_account_signal)  # Connect back button to emit the signal
+
+
+        # Bring to the setting. Its needed to use the web browser
+        self.SettingButton = QPushButton('Setting', self)
+        layout.addWidget(self.SettingButton)
+        self.SettingButton.clicked.connect(
+            self.emit_switch_to_setting_signal)  # Connect the button to the setting signal
+
 
 
 class CreateDataBaseWidget(QWidget):
@@ -433,6 +445,41 @@ class ResearchWidget(QWidget):
         except Exception as e:
             print(f'Button error {e}')
 
+
+class SettingWidget(QWidget):
+    switch_back_signal = pyqtSignal()
+
+    def emit_switch_back_signal(self):
+        self.switch_back_signal.emit()
+
+    def open_file_dialog(self):
+        # Open the file dialog and get the selected directory
+        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+        # Set the text of the label to the selected directory
+        self.label.setText("Selected folder: " + folder_path)
+    def __init__(self, parent):
+        super().__init__(parent)
+        layout = QVBoxLayout()
+        self.setLayout(layout)
+        # Set the browser choice
+        self.browser_radio_label = QLabel('Choose your browser: ', self)
+        self.radio_button_Chrome = QRadioButton('Google Chrome')
+        self.radio_button_FireFox = QRadioButton('FireFox')
+        layout.addWidget(self.browser_radio_label)
+        layout.addWidget(self.radio_button_FireFox)
+        layout.addWidget(self.radio_button_Chrome)
+
+        # Set the path to the browser user file
+        self.file_explorer_label = QLabel('Select the user folder of the browser\n'
+                                          'Usually in "C:\\Users\\user\\AppData\\Roaming\\WEB_BROWSER"')
+        self.file_explorer_button = QPushButton('Open File Explorer')
+        self.file_explorer_button.clicked.connect(self.open_file_dialog)  # Launch File Explorer
+
+        layout.addWidget(self.file_explorer_label)
+        layout.addWidget(self.file_explorer_button)
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -449,9 +496,11 @@ class MainWindow(QMainWindow):
         self.start_widget.switch_to_get_research_signal.connect(self.switch_to_research_widget)
         self.start_widget.switch_to_create_account_signal.connect(self.switch_to_user_creation)
         self.start_widget.switch_to_update_database_signal.connect(self.switch_to_update_database_widget)
+        self.start_widget.switch_to_setting_signal.connect(self.switch_to_setting_link_widget)
 
         self.setCentralWidget(self.start_widget)
 
+    # region Init widget
     def init_create_database_widget(self):
         self.create_database_widget = CreateDataBaseWidget(self)
 
@@ -467,6 +516,8 @@ class MainWindow(QMainWindow):
         self.create_account_widget.switch_back_signal.connect(self.switch_to_start_widget)
 
         self.setCentralWidget(self.create_account_widget)
+
+
 
     def init_manual_qa_widget(self):
         self.manual_qa_widget = ManualQAWidget(self)
@@ -484,6 +535,10 @@ class MainWindow(QMainWindow):
         self.course_link_widget = CourseLinkWidget(self)
         self.course_link_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
 
+    def init_setting_link_widget(self):
+        self.setting_link_widget = SettingWidget(self)
+        self.setting_link_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+
     def switch_to_create_widget(self):
         self.init_create_database_widget()
 
@@ -496,6 +551,7 @@ class MainWindow(QMainWindow):
         self.research_widget.switch_back_signal.connect(self.switch_to_start_widget)  # Connect back signal
         self.resize(800, 600)
         self.setCentralWidget(self.research_widget)
+
 
     def switch_to_user_creation(self):
         self.init_create_account_widget()
@@ -533,8 +589,15 @@ class MainWindow(QMainWindow):
         self.init_course_link_widget()
         self.setCentralWidget(self.course_link_widget)
 
+    def switch_to_setting_link_widget(self):
+        self.init_setting_link_widget()
+        self.setCentralWidget(self.setting_link_widget)
+
+
+    # endregion
 
 if __name__ == '__main__':
+    
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()

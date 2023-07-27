@@ -23,7 +23,7 @@ class WILLHANDLE:
         if self._driv:
             pass
         else:
-            self._driv = webdriver.Firefox()
+            self._driv = webdriver.FirefoxOptions()
 
 
     # region connect to the website

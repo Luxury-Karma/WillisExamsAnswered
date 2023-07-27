@@ -6,6 +6,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+import json
 
 # region Key handling
 
@@ -160,3 +161,15 @@ def load_key_and_salt_from_file(file_name: str) -> tuple[bytes, bytes]:
     return key, salt
 
 # endregion
+
+
+# region Path
+def get_path_for_browser(browser: str, path_to_extension: str) -> None:
+    user_options = {
+        'browser': f'{browser}',
+        'extension': f'{path_to_extension}'
+    }
+    with open('user_option.json', 'w') as files:
+        json.dump(user_options, files)
+
+# end region
