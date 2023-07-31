@@ -152,6 +152,7 @@ cython_debug/
 #.idea/
 data.json
 userFile/profile.json
+userFile/setting.json
 userFile/willisAnswer.json
 userFile/decryption.txt
 build.zip
