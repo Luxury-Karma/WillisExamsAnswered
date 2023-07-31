@@ -452,6 +452,9 @@ class SettingWidget(QWidget):
     def emit_switch_back_signal(self):
         self.switch_back_signal.emit()
 
+    def send_data(self):
+        Data.
+
     def open_file_dialog(self):
         # Open the file dialog and get the selected directory
         folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
@@ -470,14 +473,9 @@ class SettingWidget(QWidget):
         layout.addWidget(self.radio_button_FireFox)
         layout.addWidget(self.radio_button_Chrome)
 
-        # Set the path to the browser user file
-        self.file_explorer_label = QLabel('Select the user folder of the browser\n'
-                                          'Usually in "C:\\Users\\user\\AppData\\Roaming\\WEB_BROWSER"')
-        self.file_explorer_button = QPushButton('Open File Explorer')
-        self.file_explorer_button.clicked.connect(self.open_file_dialog)  # Launch File Explorer
-
-        layout.addWidget(self.file_explorer_label)
-        layout.addWidget(self.file_explorer_button)
+        self.send_button = QPushButton('Save Change')
+        layout.addWidget(self.send_button)
+        self.send_button.clicked()
 
 
 class MainWindow(QMainWindow):

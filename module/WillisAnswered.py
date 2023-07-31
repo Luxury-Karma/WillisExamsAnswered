@@ -8,7 +8,7 @@ from module import user_handeling as user
 class DataHandle(WILLHANDLE.WILLHANDLE):
 
     def __init__(self, regex: str = None, jsonDic: dict = None, pathToData: str = None, pathToUser: str = None,
-                 pathToKey: str = None, courseURL: str = None):
+                 pathToKey: str = None, courseURL: str = None, pathSetting: str = None):
         super().__init__()
 
         self.__pyPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -16,6 +16,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self._DataPath = pathToData if pathToData else os.path.join(self.__pyPath, 'userFile\\willisAnswer.json')
         self._userPath = pathToUser if pathToUser else os.path.join(self.__pyPath, 'userFile\\profile.json')
         self._keyPath = pathToKey if pathToKey else os.path.join(self.__pyPath, 'userFile\\decryption.txt')
+        self._userSettingPath = pathSetting if pathSetting else os.path.join(self.__pyPath, 'userFile\\setting.json')
         self.regex = regex
         self._jsonDictionary = jsonDic if jsonDic else self.__open_json_data()
         self._courseURL: str = courseURL if courseURL else 'https://students.willisonline.ca/my/courses.php'
@@ -284,3 +285,15 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         return self._jsonDictionary[question]
 
     # endregion
+
+
+    # region setting handeling
+
+    def change_user_setting(self, setting: dict):
+        with open(self._userSettingPath, 'w') as file:
+            json.dump(setting, file)
+
+    def get_user_browser(self):
+        with open(self._userSettingPath, 'r') as file:
+            json.
+    #end region
