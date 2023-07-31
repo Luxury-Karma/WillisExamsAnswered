@@ -453,14 +453,22 @@ class SettingWidget(QWidget):
         self.switch_back_signal.emit()
 
     def send_data(self):
-        Data.
+        browser: str = 'edge'  # Ensure we have a value
+        if self.radio_button_edge.isChecked():
+            browser = 'edge'
+        elif self.radio_button_Chrome.isChecked():
+            browser = 'google'
+        elif self.radio_button_FireFox.isChecked():
+            browser = 'firefox'
+        elif self.radio_button_safari.isChecked():
+            browser = 'safari'
 
-    def open_file_dialog(self):
-        # Open the file dialog and get the selected directory
-        folder_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+        setting = {
+            'browser': browser
+        }
 
-        # Set the text of the label to the selected directory
-        self.label.setText("Selected folder: " + folder_path)
+        Data.change_user_setting(setting)
+
     def __init__(self, parent):
         super().__init__(parent)
         layout = QVBoxLayout()
@@ -469,13 +477,23 @@ class SettingWidget(QWidget):
         self.browser_radio_label = QLabel('Choose your browser: ', self)
         self.radio_button_Chrome = QRadioButton('Google Chrome')
         self.radio_button_FireFox = QRadioButton('FireFox')
-        layout.addWidget(self.browser_radio_label)
-        layout.addWidget(self.radio_button_FireFox)
-        layout.addWidget(self.radio_button_Chrome)
+        self.radio_button_safari = QRadioButton('Safari')
+        self.radio_button_edge = QRadioButton('Edge')
 
         self.send_button = QPushButton('Save Change')
+        self.back_button = QPushButton('Back')
+
+        layout.addWidget(self.browser_radio_label)
+        layout.addWidget(self.radio_button_edge)
+        layout.addWidget(self.radio_button_Chrome)
+        layout.addWidget(self.radio_button_FireFox)
+        layout.addWidget(self.radio_button_safari)
+
         layout.addWidget(self.send_button)
-        self.send_button.clicked()
+        layout.addWidget(self.back_button)
+
+        self.send_button.clicked.connect(self.send_data)
+        self.back_button.clicked.connect(self.emit_switch_back_signal)
 
 
 class MainWindow(QMainWindow):
@@ -535,7 +553,7 @@ class MainWindow(QMainWindow):
 
     def init_setting_link_widget(self):
         self.setting_link_widget = SettingWidget(self)
-        self.setting_link_widget.switch_back_signal.connect(self.switch_to_update_database_widget)
+        self.setting_link_widget.switch_back_signal.connect(self.switch_to_start_widget)
 
     def switch_to_create_widget(self):
         self.init_create_database_widget()

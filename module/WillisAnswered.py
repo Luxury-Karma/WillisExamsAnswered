@@ -10,7 +10,6 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     def __init__(self, regex: str = None, jsonDic: dict = None, pathToData: str = None, pathToUser: str = None,
                  pathToKey: str = None, courseURL: str = None, pathSetting: str = None):
         super().__init__()
-
         self.__pyPath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
         self.__user_dir = os.path.join(self.__pyPath, 'userFile')
         self._DataPath = pathToData if pathToData else os.path.join(self.__pyPath, 'userFile\\willisAnswer.json')
@@ -292,8 +291,17 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
     def change_user_setting(self, setting: dict):
         with open(self._userSettingPath, 'w') as file:
             json.dump(setting, file)
+        br = self.get_user_browser()
+        self._browser = br
 
-    def get_user_browser(self):
-        with open(self._userSettingPath, 'r') as file:
-            json.
+    def get_user_browser(self) -> str:
+        """
+        :return: The browser the user want to use. Default value at edge
+        """
+        try:
+            with open(self._userSettingPath, 'r') as file:
+                data = json.load(file) # Open it as a dictionary
+                return data['browser']
+        except ValueError:
+            return 'edge'  # There is an error by reading the file. default value return
     #end region

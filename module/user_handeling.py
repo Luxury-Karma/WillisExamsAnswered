@@ -163,13 +163,7 @@ def load_key_and_salt_from_file(file_name: str) -> tuple[bytes, bytes]:
 # endregion
 
 
-# region Path
-def get_path_for_browser(browser: str, path_to_extension: str) -> None:
-    user_options = {
-        'browser': f'{browser}',
-        'extension': f'{path_to_extension}'
-    }
-    with open('user_option.json', 'w') as files:
-        json.dump(user_options, files)
+# region setting
+
 
 # end region

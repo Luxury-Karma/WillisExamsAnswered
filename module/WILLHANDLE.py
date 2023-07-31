@@ -13,18 +13,28 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class WILLHANDLE:
-    def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None, driv: webdriver = None):
+    def __init__(self, WILLIS_WEB_SITE=None, QUIZ_DETECTION_REGEX=None, driv: webdriver = None, browser: str = None):
         self.__QUIZ_DETECTION_REGEX = QUIZ_DETECTION_REGEX if QUIZ_DETECTION_REGEX else r'^https:\/\/students\.willisonline\.ca\/mod\/quiz\/.*$'
         self.__WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
         self._driv: webdriver = driv
         self._got_connection_to_willis: bool = False
+        self._browser = browser if browser else 'edge'
 
     def _needDriver(self):
         if self._driv:
             pass
         else:
-            self._driv = webdriver.Chrome()
-
+            try:
+                if self._browser == 'google':
+                    self._driv = webdriver.Chrome()
+                elif self._browser == 'firefox':
+                    self._driv = webdriver.Firefox()
+                elif self._browser == 'edge':
+                    self._driv = webdriver.Edge()
+                elif self._browser == 'safari':
+                    self._driv = webdriver.Safari()
+            except:
+                self._driv = webdriver.Edge()
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
