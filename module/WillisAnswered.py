@@ -120,6 +120,8 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         :return: Nothing
         """
         if not self._got_connection_to_willis:
+            with open(self._userSettingPath, 'r') as f:
+                self._browser = json.load(f)['browser']
             self.__handle_non_connection(file_password)
 
         self.__add_question_to_dictionary(link_of_review)
@@ -287,7 +289,6 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
 
 
     # region setting handeling
-
     def change_user_setting(self, setting: dict):
         with open(self._userSettingPath, 'w') as file:
             json.dump(setting, file)
