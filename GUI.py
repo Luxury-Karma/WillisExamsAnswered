@@ -8,6 +8,20 @@ from module import WillisAnswered
 
 Data = WillisAnswered.DataHandle()  # The object use to interact with the program
 
+#region General Graphical Function
+
+def basic_side_layout(set_up_list:list[list]) -> QVBoxLayout:
+    layout: QVBoxLayout = QVBoxLayout()
+    for e in set_up_list:
+        temp_layout = QHBoxLayout()
+        temp_layout.addWidget(e[1])
+        temp_layout.addWidget(e[0])
+        layout.addLayout(temp_layout)
+    return layout
+
+#endregion
+
+
 #region user config
 def user_creation_widget() -> QVBoxLayout:
     """
@@ -36,12 +50,8 @@ def user_creation_widget() -> QVBoxLayout:
     set_up_list = [[user_line,user_line_text], [user_password_line,user_password_text],
                    [user_file_password,user_file_text]]
     # set them up
+    layout.addLayout(basic_side_layout(set_up_list))
 
-    for e in set_up_list:
-        temp_layout = QHBoxLayout()
-        temp_layout.addWidget(e[1])
-        temp_layout.addWidget(e[0])
-        layout.addLayout(temp_layout)
     layout.addWidget(save_button)
     layout.addWidget(back_button)
     return layout
@@ -87,18 +97,35 @@ def add_question_menu_widget() -> QVBoxLayout:
     :return:
     """
     layout: QVBoxLayout = QVBoxLayout()
+    add_back_button = QPushButton('Back')
     add_quiz_button = QPushButton('Add a quiz review')
     add_question_button = QPushButton('Add manual question')
-    
+    add_course_button = QPushButton('Add course reviews')
+    create_data_base_button = QPushButton('Create Database')
+    layout.addWidget(add_quiz_button)
+    layout.addWidget(add_question_button)
+    layout.addWidget(add_course_button)
+    layout.addWidget(create_data_base_button)
+    layout.addWidget(add_back_button)
 
     return layout
 
-def add_review_quiz_widget() -> QVBoxLayout:
+def add_review_quiz_widget(label:str, placeHolder:str, typeSearch: str) -> QVBoxLayout:
     """
-    The menu to send the program at a specific link to get the questions and answer
-    :return:
+    Menue built for any link to get info to
+    :return: The layout of the page
     """
     layout: QVBoxLayout = QVBoxLayout()
+    add_url_text = QLabel()
+    add_url_text.setText(f'{label}')
+    add_url = QLineEdit()
+    add_url.setPlaceholderText(f'{placeHolder}')
+    add_send_button = QPushButton('Send')
+    hlayout = QHBoxLayout()
+    hlayout.addWidget(add_url_text)
+    hlayout.addWidget(add_url)
+    layout.addLayout(hlayout)
+    layout.addWidget(add_send_button)
     return layout
 
 def add_course_quiz_widget() -> QVBoxLayout:
@@ -107,6 +134,7 @@ def add_course_quiz_widget() -> QVBoxLayout:
     :return: 
     """
     layout: QVBoxLayout = QVBoxLayout()
+
     return layout
 
 def add_manual_question_widget() -> QVBoxLayout:
@@ -115,6 +143,29 @@ def add_manual_question_widget() -> QVBoxLayout:
     :return:
     """
     layout: QVBoxLayout = QVBoxLayout()
+
+    add_question_text = QLabel()
+    add_question_text.setText('Enter question to create: ')
+
+    add_question_line = QLineEdit()
+    add_question_line.setPlaceholderText('What is a cisco machine?')
+
+    add_answer_text = QLabel()
+    add_answer_text.setText('Enter the answer to the question: ')
+
+    add_answer_line = QLineEdit()
+    add_answer_line.setPlaceholderText('It is a network machine')
+
+    add_course_text = QLabel()
+    add_course_text.setText('Which course it is link to: ')
+
+    add_course_line = QLineEdit()
+    add_course_line.setPlaceholderText('CCNA')
+
+    side_layout = [[add_question_line,add_question_text],[add_answer_line,add_answer_text],
+                   [add_course_line,add_course_text]]
+    layout.addLayout(basic_side_layout(side_layout))
+
     return layout
 
 def create_data_base_widget() -> QVBoxLayout:
@@ -148,6 +199,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = QWidget()
     window.setWindowTitle('Willis College Student Database')
-    window.setLayout(user_creation_widget())
+    window.setLayout(add_manual_question_widget())
     window.show()
     sys.exit(app.exec())
