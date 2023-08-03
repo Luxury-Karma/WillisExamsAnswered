@@ -3,8 +3,8 @@ import sys
 from PyQt5.QtCore import pyqtSignal, Qt, pyqtBoundSignal
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, \
     QWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QRadioButton, QFileDialog, QHBoxLayout
-import PyQt5.QtWidgets
 
+import tkinter
 from module import WillisAnswered
 
 Data = WillisAnswered.DataHandle()  # The object use to interact with the program
@@ -47,8 +47,6 @@ def moving_widget(moving_widget:str) -> None:
 
 
 #endregion
-
-
 
 
 #region setting
