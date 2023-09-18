@@ -145,7 +145,9 @@ def data_detection(path_to_create):
 
 
 def get_user_setting():
-    with open('userFile\\setting.json', 'r') as file:
+    json_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'userFile', 'setting.json')
+
+    with open(json_path, 'r') as file:
         data = json.load(file)
         return data['browser']
 
