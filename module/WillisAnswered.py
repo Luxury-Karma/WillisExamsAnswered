@@ -300,7 +300,7 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         """
         try:
             with open(self._userSettingPath, 'r') as file:
-                data = json.load(file) # Open it as a dictionary
+                data = json.load(file)  # Open it as a dictionary
                 return data['browser']
         except ValueError:
             return 'edge'  # There is an error by reading the file. default value return

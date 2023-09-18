@@ -3,7 +3,7 @@ import time
 import urllib
 from typing import List, Any
 from urllib.parse import urlparse
-
+from module import user_handeling
 from bs4 import *
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -18,7 +18,8 @@ class WILLHANDLE:
         self.__WILLIS_WEB_SITE = WILLIS_WEB_SITE if WILLIS_WEB_SITE else "https://willisonline.ca/login"
         self._driv: webdriver = driv
         self._got_connection_to_willis: bool = False
-        self._browser = browser if browser else 'edge'
+        browser = browser if browser else user_handeling.get_user_setting()
+        self._browser = browser if browser else 'firefox'
 
     def _needDriver(self):
         if self._driv:
@@ -29,12 +30,10 @@ class WILLHANDLE:
                     self._driv = webdriver.Chrome()
                 elif self._browser == 'firefox':
                     self._driv = webdriver.Firefox()
-                elif self._browser == 'edge':
-                    self._driv = webdriver.Edge()
                 elif self._browser == 'safari':
                     self._driv = webdriver.Safari()
             except:
-                self._driv = webdriver.Edge()
+                self._driv = webdriver.Firefox()
 
     # region connect to the website
     def __microsoft_connection(self, username: str, password: str) -> None:
@@ -90,9 +89,12 @@ class WILLHANDLE:
         :return: the current URL
         """
         try:
-            WebDriverWait(self._driv, 20).until(EC.element_to_be_clickable((By.LINK_TEXT, 'Moodle')))
-            self._driv.find_element(By.LINK_TEXT, 'Moodle').click()
+            #time.sleep(5)
 
+            WebDriverWait(self._driv, 20).until(EC.element_to_be_clickable((By.LINK_TEXT, 'Moodle')))
+            time.sleep(2)
+            self._driv.find_element(By.LINK_TEXT, 'Moodle').click()
+            time.sleep(2)
             self._driv.switch_to.window(self._driv.window_handles[-1])
             self._got_connection_to_willis = True
             return self._driv.current_url

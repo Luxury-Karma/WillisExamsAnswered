@@ -10,6 +10,9 @@ from module import WillisAnswered
 Data = WillisAnswered.DataHandle()
 
 
+
+
+
 class StartWidget(QWidget):
     switch_to_create_account_signal = pyqtSignal()
     switch_to_get_research_signal = pyqtSignal(str, int)

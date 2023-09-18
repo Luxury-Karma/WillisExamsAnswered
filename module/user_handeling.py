@@ -144,6 +144,11 @@ def data_detection(path_to_create):
 # endregion
 
 
+def get_user_setting():
+    with open('userFile\\setting.json', 'r') as file:
+        data = json.load(file)
+        return data['browser']
+
 # region load
 
 
