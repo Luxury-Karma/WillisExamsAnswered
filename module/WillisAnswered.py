@@ -183,6 +183,15 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
         self.__regex_creator(search.lower().split())
         return self.__find_all_matching_question()
 
+    def add_dictionary_to_json(self, dictionary_to_add: dict):
+        data: dict = {}
+        with open(self._DataPath, 'r') as jsonFile:
+            data = json.load(jsonFile)
+            data.update(dictionary_to_add)
+        if data:
+            with open(self._DataPath,'w') as newJsonFile:
+                json.dump(data, newJsonFile)
+        self.__open_json_data()
     # endregion
 
     # region Website Handling
@@ -304,4 +313,5 @@ class DataHandle(WILLHANDLE.WILLHANDLE):
                 return data['browser']
         except ValueError:
             return 'edge'  # There is an error by reading the file. default value return
+    
     #end region

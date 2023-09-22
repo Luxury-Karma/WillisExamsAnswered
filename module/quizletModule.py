@@ -61,8 +61,13 @@ class quizlet_talker:
             print('An error occurred:', str(e))
 
 
+    def quizlet_communication_question_answer(self) -> dict:
+        self._need_browser()
+        self.go_to_quiz()
+        return self.get_question_answer()
+
 if __name__ == '__main__':
-    quiz = quizlet_talker(quizlet_website='https://quizlet.com/gb/496552442/fortigate-security-60-flash-cards/')
+    quiz = quizlet_talker(quizlet_website='https://quizlet.com/119231974/fortinet-nse-4-flash-cards/')
     quiz._need_browser()
     quiz.go_to_quiz()
     quiz.get_question_answer()
