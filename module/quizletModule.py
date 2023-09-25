@@ -19,8 +19,8 @@ class quizlet_talker:
         self._drive:webdriver = None
         self._browser = browser if browser else 'firefox'
     def _need_browser(self):
-        if not self.is_browser:
-            pass
+        if self.is_browser:
+            return
         try:
             if self._browser == 'google':
                 self._drive = webdriver.Chrome()
@@ -28,14 +28,20 @@ class quizlet_talker:
                 self._drive = webdriver.Firefox()
             elif self._browser == 'safari':
                 self._drive = webdriver.Safari()
+            self.is_browser = True
         except:
             self._drive = webdriver.Firefox()
+
+    def set_link(self, new_link: str):
+        self.website = new_link
 
     def go_to_quiz(self):
         """
         Go to the quizlet website
         :return:
         """
+        self._need_browser()
+
         self._drive.get(self.website)
 
     def get_question_answer(self) -> dict:
@@ -60,11 +66,14 @@ class quizlet_talker:
         except Exception as e:
             print('An error occurred:', str(e))
 
-
     def quizlet_communication_question_answer(self) -> dict:
         self._need_browser()
         self.go_to_quiz()
         return self.get_question_answer()
+
+    def close_quizlet_driver(self):
+        self.is_browser = False
+        self._drive.close()
 
 if __name__ == '__main__':
     quiz = quizlet_talker(quizlet_website='https://quizlet.com/119231974/fortinet-nse-4-flash-cards/')
