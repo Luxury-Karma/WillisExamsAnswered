@@ -2,6 +2,18 @@
 from module import quizletModule, user_handeling, WILLHANDLE, WillisAnswered
 import argparse
 import sys
+"""
+LINK TO ADD 
+https://quizlet.com/388298485/chapters-5-6-flash-cards/
+https://quizlet.com/164457278/3408-comp-security-exam-2-flash-cards/
+https://quizlet.com/394116988/chapter-5-6-quiz-flash-cards/
+https://quizlet.com/388298485/chapters-5-6-flash-cards/
+https://quizlet.com/au/449898184/cis2005-mod-4-review-quiz-flash-cards/
+https://quizlet.com/392661676/chapters-13-14-flash-cards/
+https://quizlet.com/279820082/network-security-basics-test-2-flash-cards/
+"""
+
+
 
 def cli_helper():
     parser = argparse.ArgumentParser(description='The CLI usage to get all your questions and answers')
