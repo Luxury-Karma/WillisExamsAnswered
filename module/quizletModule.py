@@ -9,6 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+import undetected_chromedriver
 from selenium.webdriver.support.ui import WebDriverWait
 
 
@@ -17,13 +18,13 @@ class quizlet_talker:
         self.website = quizlet_website if quizlet_website else 'https://quizlet.com/latest'
         self.is_browser = False
         self._drive:webdriver = None
-        self._browser = browser if browser else 'firefox'
+        self._browser = browser if browser else 'google'
     def _need_browser(self):
         if self.is_browser:
             return
         try:
             if self._browser == 'google':
-                self._drive = webdriver.Chrome()
+                self._drive = undetected_chromedriver.Chrome()
             elif self._browser == 'firefox':
                 self._drive = webdriver.Firefox()
             elif self._browser == 'safari':
@@ -54,12 +55,14 @@ class quizlet_talker:
             for question_div in question_divs:
                 question_elem = question_div.find('a', class_='SetPageTerm-wordText')
                 answer_elem = question_div.find('a', class_='SetPageTerm-definitionText')
-
+                if question_elem and not answer_elem:
+                    answer_elem = question_div.find('div', class_="SetPageTerm-side SetPageTerm-largeSide b1sa2ccx").find('div', class_='SetPageTerm-sideContent').find('span', class_='SetPageTerm-definitionText')
                 if question_elem and answer_elem:
                     question_text = question_elem.find('span', class_='TermText notranslate lang-en').text
                     answer_text = answer_elem.find('span', class_='TermText notranslate lang-en').text
 
                     question_dict[question_text] = answer_text
+                    print(f'QUESTION ANSWER FOUND : {question_text} : {answer_text}')
 
             return question_dict
 

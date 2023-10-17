@@ -33,7 +33,6 @@ def speakToQuizlet(quizlet_link, quizlet_t: quizletModule.quizlet_talker) -> qui
     return quizlet_t
 
 
-
 if __name__ == '__main__':
     parser = cli_helper()
     args = parser.parse_args()
@@ -41,7 +40,7 @@ if __name__ == '__main__':
 
     if args.quizlet:
         quizlet_page = quizletModule.quizlet_talker()
-        speakToQuizlet(args.quizlet, quizlet_page).close_quizlet_driver()
+        speakToQuizlet(args.quizlet[0], quizlet_page).close_quizlet_driver()
 
     if args.getMultipleQuestion:
         quizlet_page = quizletModule.quizlet_talker()
